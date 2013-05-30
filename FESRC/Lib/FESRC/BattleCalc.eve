@@ -1,0 +1,743 @@
+*プロローグ:
+Global Ｐ－Ｄｅ＝Ｄ武器相性命中補正
+Global Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正
+Exit
+
+
+// 命中の成否、ダメージをまとめて計算する。
+Ｐ－Ｄｅ＝Ｄ一括戦闘計算:
+Local attackerUnitID = Args(1)
+Local defenderUnitID = Args(2)
+Local attackerWeapon = Args(3)
+Local defenderWeapon = Args(4)
+
+Call Ｐ－Ｄｅ＝Ｄ武器相性補正値取得 attackerUnitID defenderUnitID attackerWeapon defenderWeapon
+Local accuracyRate = Ｐ－Ｄｅ＝Ｄ命中率取得(attackerUnitID, attackerWeapon)
+Local evadeRate    = Ｐ－Ｄｅ＝Ｄ回避率取得(defenderUnitID, defenderWeapon, attackerUnitID, attackerWeapon)
+Local finalAccuracyRate = IIf(Info(ユニット, defenderUnitID, 特殊能力所有, "地形ユニット") = 0, Ｐ－Ｄｅ＝Ｄ最終命中率取得(accuracyRate, evadeRate), 100)
+Local damage = Ｐ－Ｄｅ＝Ｄダメージ取得(attackerUnitID, defenderUnitID, attackerWeapon)
+Return IIf(Ｐ－Ｄｅ＝Ｄ命中判定(finalAccuracyRate) = "命中", damage, "回避")
+
+// 武器相性による補正値を得る
+Ｐ－Ｄｅ＝Ｄ武器相性補正値取得:
+Local attackerUnitID = Args(1)
+Local defenderUnitID = Args(2)
+Local attackerWeapon = Args(3)
+Local defenderWeapon = Args(4)
+
+Local 命中率ＵＰ = 15
+Local 攻撃力ＵＰ = 1
+Local 命中率ＤＯＷＮ = -15
+Local 攻撃力ＤＯＷＮ = -1
+
+Local 攻撃側武器種別 = Ｐ－Ｄｅ＝Ｄ武器種別取得(attackerUnitID, attackerWeapon)
+Local 防御側武器種別 = Ｐ－Ｄｅ＝Ｄ武器種別取得(defenderUnitID, defenderWeapon)
+
+Switch 攻撃側武器種別
+Case "剣"
+    Switch 防御側武器種別
+    Case "斧"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＵＰ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＵＰ
+    Case "槍"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＤＯＷＮ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＤＯＷＮ
+    Case Else
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+    EndSw
+Case "斧"
+    Switch 防御側武器種別
+    Case "槍"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＵＰ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＵＰ
+    Case "剣"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＤＯＷＮ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＤＯＷＮ
+    Case Else
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+    EndSw
+Case "槍"
+    Switch 防御側武器種別
+    Case "剣"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＵＰ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＵＰ
+    Case "斧"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＤＯＷＮ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＤＯＷＮ
+    Case Else
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+    EndSw
+Case "火"
+    Switch 防御側武器種別
+    Case "風"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＵＰ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＵＰ
+    Case "雷"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＤＯＷＮ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＤＯＷＮ
+    Case Else
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+    EndSw
+Case "風"
+    Switch 防御側武器種別
+    Case "雷"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＵＰ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＵＰ
+    Case "火"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＤＯＷＮ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＤＯＷＮ
+    Case Else
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+    EndSw
+Case "雷"
+    Switch 防御側武器種別
+    Case "火"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＵＰ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＵＰ
+    Case "風"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＤＯＷＮ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＤＯＷＮ
+    Case Else
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+    EndSw
+Case "闇" "光"
+    Switch 防御側武器種別
+    Case "火" "風" "雷"
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 命中率ＵＰ
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 攻撃力ＵＰ
+    Case Else
+        Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+        Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+    EndSw
+Case Else
+    Set Ｐ－Ｄｅ＝Ｄ武器相性命中補正 0
+    Set Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正 0
+EndSw
+Return
+
+
+//武器の種別を得る
+FE武器種別取得:
+Ｐ－Ｄｅ＝Ｄ武器種別取得:
+Local target = Args(1)      //攻撃者のメインパイロット名または愛称、ユニット名またはユニットＩＤ
+Local weapon = Args(2)      //武器番号
+Set target UnitID(IIf(IsDefined(target, パイロット), target, PilotID(target)))
+
+Local result = ""
+If target != "" Then
+    Local 武器属性 =  Info(ユニット, target, 武器, weapon, 属性)
+    If Info(ユニット, target, 武器, weapon, 属性所有, 変) Then
+        If FE攻撃種別[target] = "魔法" Then
+		    Set 武器属性 Mid(武器属性, InStr(武器属性, "変") + 1, 1)
+		Else
+		    Set 武器属性 Replace(武器属性, Mid(武器属性, InStr(武器属性, "変"), 2), "")
+		EndIf
+    EndIf
+    If InStr(武器属性, "剣") Then
+        Set result "剣"
+    ElseIf InStr(武器属性, "斧") Then
+        Set result "斧"
+    ElseIf InStr(武器属性, "槍") Then
+        Set result "槍"
+    ElseIf InStr(武器属性, "火") Then
+        Set result "火"
+    ElseIf InStr(武器属性, "風") Then
+        Set result "風"
+    ElseIf InStr(武器属性, "雷") Then
+        Set result "雷"
+    ElseIf InStr(武器属性, "闇") Then
+        Set result "闇"
+    ElseIf InStr(武器属性, "光") Then
+        Set result "光"
+    EndIf
+Else
+    Talk
+	サブルーチン「FE武器種別取得」の変数の値が不正です。
+	End
+EndIf
+Return result
+
+
+// 攻撃が命中したかどうかの判定を行う。
+Ｐ－Ｄｅ＝Ｄ命中判定:
+Local finalAccuracyRate = args(1)
+If Random(100) <= finalAccuracyRate Then
+    Return "命中"
+Endif
+Return "回避"
+
+
+// 最終命中率（攻撃側の命中率から防御側の回避率を引いた値）を得る。
+// 100%以上の場合、100を返す。
+Ｐ－Ｄｅ＝Ｄ最終命中率取得:
+Local accuracyRate = args(1)
+Local evadeRate    = args(2)
+
+Local finalAccuracyRate = (accuracyRate - evadeRate)
+If 100 < finalAccuracyRate Then
+    Return 100
+EndIf
+Return IIf(0 < finalAccuracyRate, finalAccuracyRate, 0)
+
+// 計算式はFE烈火の剣を参考にしている
+// 参考 : http://www.pegasusknight.com/mb/fe7/dt_form.html
+
+
+// 命中率を得る
+Ｐ－Ｄｅ＝Ｄ命中率取得:
+Local target = Args(1)
+Local weapon = Args(2)
+
+Local result
+If Not Info(ユニット, target, 武器, weapon, 属性所有, "杖") Then
+	#物理or魔法
+	#武器命中率 + 技 * 2 + 幸運 / 2 + 武器相性修正 + 指揮補正
+	Set result (Info(ユニット, target, 武器, weapon, 命中率) + Info(パイロット, PilotID(target), ステータス技) * 2 + Info(パイロット, PilotID(target), ステータス幸運) / 2 + Ｐ－Ｄｅ＝Ｄ武器相性命中補正 + FE指揮補正取得(target))
+Else
+	#杖
+    #30＋魔力×5＋技
+    Set result (30 + Skill(PilotID(target), 魔力) * 5 + Skill(PilotID(target), 技))
+EndIf
+Return result
+
+
+FE指揮補正取得:
+Local target = Args(1)
+
+Local result = 0
+Local 元対象パイロット = 対象パイロット
+Local 指揮範囲 = 0
+ForEach Party(target) 出撃
+	//専用の「広域支援」技能版。正式採用はこちら
+    If Skill(対象パイロット, 広域支援) Then
+	    Set 指揮範囲 3
+		If Abs(X(対象パイロット) - X(target)) + Abs(Y(対象パイロット) - Y(target)) <= 指揮範囲 Then
+		    Incr result (Skill(対象パイロット, 広域支援) * 5)
+		EndIf
+	EndIf
+	//指揮技能版。パイロットステータスの技と速さに補正が入ってしまうため、
+	//ゆくゆくは非対応になるかも
+    If Skill(対象パイロット, 指揮) Then
+	    Set 指揮範囲 IIf(6 < Skill(対象パイロット, 階級), 3 + (Skill(対象パイロット, 階級) - 6) / 3, 3)
+		If Abs(X(対象パイロット) - X(target)) + Abs(Y(対象パイロット) - Y(target)) <= 指揮範囲 Then
+		    Incr result (Skill(対象パイロット, 指揮) * 5)
+		EndIf
+	EndIf
+Next
+Select 元対象パイロット
+Return result
+
+
+// 回避率を得る
+Ｐ－Ｄｅ＝Ｄ回避率取得:
+Local defenderUnitID = Args(1)
+Local defenderWeapon = Args(2)
+Local attackerUnitID = Args(3)
+Local attackerWeapon = Args(4)
+
+Local result
+If Not Info(ユニット, attackerUnitID, 武器, attackerWeapon, 属性所有, "杖") Then
+	#物理or魔法
+	#攻撃速度 * 2 + 幸運 + 地形補正 + 指揮補正
+	Set result (Ｐ－Ｄｅ＝Ｄ攻撃速度取得(defenderUnitID, defenderWeapon) * 2 + Info(パイロット, PilotID(defenderUnitID), ステータス幸運) + Info(マップ, X(defenderUnitID), Y(defenderUnitID), 回避修正) + FE指揮補正取得(defenderUnitID))
+Else
+	#杖
+    #魔防×5＋(自分と相手の距離) ×2
+    Set result (Info(ユニット, defenderUnitID, ステータス魔防) * 5 + (Abs(X(defenderUnitID) - X(attackerUnitID)) + Abs(Y(defenderUnitID) - Y(attackerUnitID))) * 2)
+EndIf
+Return result
+
+
+// 攻撃速度を得る
+Ｐ－Ｄｅ＝Ｄ攻撃速度取得:
+Local target = Args(1)
+Local weapon = Args(2)
+
+If weapon = "" Then
+    Return Info(パイロット, PilotID(target), ステータス速さ)
+EndIf
+
+Local temp    // 武器重量 - 体格
+Set   temp (Ｐ－Ｄｅ＝Ｄ武器重量取得(target, weapon) - Info(パイロット, PilotID(target), ステータス体格))
+Local attackSpeed
+If 0 < temp Then
+    // 速さ - (武器重量 - 体格)
+    Set attackSpeed (Info(パイロット, PilotID(target), ステータス速さ) - temp)
+Else
+    // 速さ
+    Set attackSpeed Info(パイロット, PilotID(target), ステータス速さ)
+EndIf
+Return IIf(0 < attackSpeed, attackSpeed, 0)
+
+
+// 武器重量を得る
+Ｐ－Ｄｅ＝Ｄ武器重量取得:
+Local target = Args(1)
+Local weapon = Args(2)
+
+Local result
+Local weaponName = Info(ユニット, target, 武器, weapon)
+If Info(ユニット, target, 特殊能力所有, weaponName & "重さ") Then
+	Set result Info(ユニット, target, 特殊能力レベル, weaponName & "重さ")
+ElseIf Info(ユニット, target, 特殊能力所有, weaponName & "重量") Then
+	Set result Info(ユニット, target, 特殊能力レベル, weaponName & "重量")
+Else
+	// (100 - 武器命中率) / 10 * 2
+	Set result ((100 - Info(ユニット, target, 武器, weapon, 命中率)) / 10 * 2)
+EndIf
+Return result
+
+
+// 与ダメージを得る。クリティカルの判定も行う。
+Ｐ－Ｄｅ＝Ｄダメージ取得:
+Local attackerUnitID = Args(1)
+Local defenderUnitID = Args(2)
+Local attackerWeapon = Args(3)
+Local opt = Args(4)
+Local damage
+
+// 攻撃力取得
+Local attackPower = Ｐ－Ｄｅ＝Ｄ攻撃力取得(attackerUnitID, attackerWeapon)
+
+// 特効処理
+Set 特効フラグ 0
+// 弓→飛行
+If Not Info(ユニット, defenderUnitID, 特殊能力所有, 弓特効無効) Then
+    If IsDefined(Info(ユニット, attackerUnitID, 武器, attackerWeapon), アイテム) Then
+        If Info(Info(ユニット, attackerUnitID, 武器, attackerWeapon), アイテムクラス) = "弓" Then
+            If InStr(Info(ユニット, defenderUnitID, 移動可能地形), "空") != 0 Then
+                Set 特効フラグ
+            EndIf
+        EndIf
+	EndIf
+EndIf
+// その他
+If Info(ユニット, attackerUnitID, 特殊能力所有, (Info(ユニット, attackerUnitID, 武器, attackerWeapon) & "特効")) Then
+    Local 特効対象 = Info(ユニット, attackerUnitID, 特殊能力解説, (Info(ユニット, attackerUnitID, 武器, attackerWeapon) & "特効"))
+	
+	//特効無効
+    Local i
+	Local 特効無効対象 特効無効対象Arr
+	For i = 1 To Info(ユニット, defenderUnitID, 特殊能力数)
+	    If Not Info(ユニット, defenderUnitID, 特殊能力, i) = 弓特効無効 Then
+        	If InStr(Info(ユニット, defenderUnitID, 特殊能力, i), "特効無効") Then
+			    If Info(ユニット, defenderUnitID, 特殊能力解説, i) = "全" Then
+				    Set 特効対象 ""
+					Break
+				Else
+        		    Set 特効無効対象 Info(ユニット, defenderUnitID, 特殊能力解説, i)
+        			Array 特効無効対象Arr 特効無効対象 ":"
+    	    		Local j
+    		    	For j = 1 To Count(特効無効対象Arr)
+        		    	Set 特効対象 Replace(特効対象, 特効無効対象Arr[j], "")
+    			    Next
+				EndIf
+			EndIf
+	    EndIf
+	Next
+	
+	If Not 特効対象 = "" Then
+    	Local 特効対象Arr
+	    Array 特効対象Arr 特効対象 ":"
+    	For i = 1 To Count(特効対象Arr)
+            If InStr(Info(ユニット, defenderUnitID, ユニットクラス), 特効対象Arr[i]) != 0 Then
+                Set 特効フラグ
+                Break
+            EndIf
+    	Next
+	EndIf
+EndIf
+If 特効フラグ = 1 Then
+    Incr attackPower attackPower
+EndIf
+
+// クリティカル判定
+If opt != "クリティカル無視" Then
+    Set fＰ－Ｄｅ＝Ｄクリティカル 0
+    Local criticalRate = Ｐ－Ｄｅ＝Ｄ必殺率取得(attackerUnitID, attackerWeapon)
+    Local criticalEvadeRate = Ｐ－Ｄｅ＝Ｄ必殺回避率取得(defenderUnitID)
+    Set FEトライアングルアタック発動 FEトライアングルアタック判定(attackerUnitID, defenderUnitID)
+    If FEトライアングルアタック発動 Or (Random(100) <= Ｐ－Ｄｅ＝Ｄ最終必殺率取得(criticalRate, criticalEvadeRate)) Or 怒り発動[PilotID(attackerUnitID)] Then
+		If Not ＣＴダメージ３倍フラグ = 1 Then
+	        Set attackPower (attackPower * 2)
+		EndIf
+        Set fＰ－Ｄｅ＝Ｄクリティカル
+    Else
+        Set fＰ－Ｄｅ＝Ｄクリティカル 0
+    EndIf
+EndIf
+
+If 月光発動[PilotID(attackerUnitID)] = 1 Then
+    Set damage attackPower
+Else
+    If FE攻撃種別[attackerUnitID] = "物理" Then
+        // 物理攻撃であれば
+        // 攻撃力 - ステータス守備
+		If Not ＣＴダメージ３倍フラグ = 1 Or opt = "クリティカル無視" Or fＰ－Ｄｅ＝Ｄクリティカル = 0 Then
+	        Set damage (attackPower - Info(ユニット, defenderUnitID, ステータス守備))
+		Else
+	        Set damage ((attackPower - Info(ユニット, defenderUnitID, ステータス守備)) * 3)
+		EndIf
+    Else
+        // 魔法攻撃であれば
+        // 攻撃力 - ステータス魔防
+		If Not ＣＴダメージ３倍フラグ = 1 Or opt = "クリティカル無視" Or fＰ－Ｄｅ＝Ｄクリティカル = 0 Then
+	        Set damage (attackPower - Info(ユニット, defenderUnitID, ステータス魔防))
+		Else
+	        Set damage ((attackPower - Info(ユニット, defenderUnitID, ステータス魔防)) * 3)
+		EndIf
+    EndIf
+EndIf
+
+If 0 < damage Then
+    Return damage
+EndIf
+Return 0
+
+
+FE攻撃力取得:
+Ｐ－Ｄｅ＝Ｄ攻撃力取得:
+//攻撃力を得る
+Local target = Args(1)      //攻撃者のメインパイロット名または愛称、ユニット名またはユニットＩＤ
+Local weapon = Args(2)      //武器番号
+Set target UnitID(IIf(IsDefined(target, パイロット), target, PilotID(target)))
+
+Local result = 0
+If target != "" Then
+    If FE攻撃種別[target] = "物理" Then
+        // 物理攻撃であれば
+        // ステータス力 + 武器攻撃力 + 武器相性修正
+        Set result ((Info(パイロット,  PilotID(target), ステータス力) + Info(ユニット, target, 武器, weapon, 攻撃力) + Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正))
+    Else
+        // 魔法攻撃であれば
+        // ステータス魔力 + 武器攻撃力 + 武器相性修正
+        Set result ((Info(パイロット, PilotID(target), ステータス魔力) + Info(ユニット, target, 武器, weapon, 攻撃力) + Ｐ－Ｄｅ＝Ｄ武器相性攻撃力補正))
+    EndIf
+Else
+    Talk
+    サブルーチン「FE攻撃力取得」の引数の数が違います。
+    End
+EndIf
+Return result
+
+
+FE攻撃種別取得:
+//物理攻撃か魔法攻撃を取得する
+Local target = Args(1)      //攻撃者のメインパイロット名または愛称、ユニット名またはユニットＩＤ
+Local weapon = Args(2)      //武器番号
+Local defender = Args(3)    //防御者のメインパイロット名または愛称、ユニット名またはユニットＩＤ
+Set target UnitID(IIf(IsDefined(target, パイロット), target, PilotID(target)))
+Set defender UnitID(IIf(IsDefined(defender, パイロット), defender, PilotID(defender)))
+If (target != "") And (defender != "") Then
+    If Info(ユニット, target, 武器, weapon, 属性所有, "魔") != 1 Then
+        If Info(ユニット, target, 武器, weapon, 属性所有, "変") != 1 Then
+            Set FE攻撃種別[target] "物理"
+	    Else
+            Local 距離 = (Abs(X(target) - X(defender)) + Abs(Y(target) - Y(defender)))
+            If 距離 <= 1 Then
+                Set FE攻撃種別[target] "物理"
+            Else
+                Set FE攻撃種別[target] "魔法"
+            EndIf
+        EndIf
+    Else
+        Set FE攻撃種別[target] "魔法"
+    EndIf
+Else
+    Talk
+    サブルーチン「FE攻撃種別取得」の引数の数が違います。
+    End
+EndIf
+Return
+
+
+// バトルコンフィグで見かけの命中率の整合性が取れるようにする。
+Ｐ－Ｄｅ＝Ｄ武器番号保持:
+Local attackerUnitID = Args(1)
+Local WeaponNum = Args(2)
+Local defenseUnitID = Args(3)
+
+Global Ｐ－Ｄｅ＝ＤFriendlyWeaponNum4BC
+Global Ｐ－Ｄｅ＝ＤenemyWeaponNum4BC
+
+If Party(attackerUnitID) = 味方 Then
+    Set Ｐ－Ｄｅ＝ＤFriendlyWeaponNum4BC WeaponNum
+    UnSet tmp
+    Local tmp = Replace(Info(パイロット, PilotID(defenseUnitID), 特殊能力名称, 装備中武器名), "装備", "")
+    For i = 1 To Info(ユニット, defenseUnitID, 武器数)
+        If tmp = Info(ユニット, defenseUnitID, 武器, i) Then
+            Return i
+        EndIf
+    Next
+EndIf
+
+UnSet tmp
+If Ｐ－Ｄｅ＝ＤFriendlyWeaponNum4BC = "" Then
+    Local tmp = Replace(Info(パイロット, PilotID(defenseUnitID), 特殊能力名称, 装備中武器名), "装備", "")
+    For i = 1 To Info(ユニット, defenseUnitID, 武器数)
+        If tmp = Info(ユニット, defenseUnitID, 武器, i) Then
+            Return i
+        EndIf
+    Next
+EndIf
+
+Return Ｐ－Ｄｅ＝ＤFriendlyWeaponNum4BC
+
+
+// 必殺率を取得する。
+Ｐ－Ｄｅ＝Ｄ必殺率取得:
+Local target = Args(1)
+Local weapon = Args(2)
+
+// 装備武器の必殺率 + 技 / 2
+Return (Info(ユニット, target, 武器, weapon, クリティカル率) + Info(パイロット, Pilot(target), ステータス技) / 2)
+
+
+// 必殺回避率を取得する。
+Ｐ－Ｄｅ＝Ｄ必殺回避率取得:
+Local target = args(1)
+Return Info(パイロット, Pilot(target), ステータス幸運)
+
+
+//==============================================================================
+// Ｐ－Ｄｅ＝Ｄ最終必殺率取得
+//------------------------------------------------------------------------------
+// 最終必殺率を取得する。
+//------------------------------------------------------------------------------
+// in  : criticalRate 必殺率
+//       criticalEvadeRate 必殺回避率
+// out : 最終必殺率
+//==============================================================================
+Ｐ－Ｄｅ＝Ｄ最終必殺率取得:
+Local criticalRate = args(1)
+Local criticalEvadeRate = args(2)
+
+Local finalCriticalRate = (criticalRate - criticalEvadeRate)
+// 自分の必殺率－敵の必殺回避率
+If 100 < finalCriticalRate Then
+    Return 100
+ElseIf finalCriticalRate < 0 Then
+    Return 0
+EndIf
+Return finalCriticalRate
+
+
+// 獲得した経験値を得る
+Ｐ－Ｄｅ＝Ｄ獲得経験値取得:
+Local attackerUnitID = Args(1)
+Local defenderUnitID = Args(2)
+Local mode = Args(3)
+Local 杖基礎経験値 = Args(4)
+
+Local attackerStrong
+Local 攻撃側階級修正値
+Switch Info(ユニット, attackerUnitID, "サイズ")
+Case "S"
+    Set attackerStrong 2
+    Set 攻撃側階級修正値 0
+Case "M" "LL"
+    Set attackerStrong 3
+    Set 攻撃側階級修正値 0
+Case "L"
+    Set attackerStrong 3
+    Set 攻撃側階級修正値 20
+EndSw
+
+Local defenderStrong
+Local 防御側階級修正値
+Switch Info(ユニット, defenderUnitID, "サイズ")
+Case "S"
+    Set defenderStrong 2
+    Set 防御側階級修正値 0
+Case "M" "LL"
+    Set defenderStrong 3
+    Set 防御側階級修正値 0
+Case "L"
+    Set defenderStrong 3
+    Set 防御側階級修正値 20
+EndSw
+
+// 未撃破経験値 ＝（31＋相手のLV＋相手の階級修正A－自分のLV－自分の階級修正A）÷自分のクラスの強さ
+Local 未撃破経験値 = ((31 + Info(パイロット, PilotID(defenderUnitID), レベル) + 防御側階級修正値 - Info(パイロット, PilotID(attackerUnitID), レベル) - 攻撃側階級修正値) / attackerStrong)
+
+Local exp = 0
+Switch mode
+Case "杖"
+    Set exp IIf(Info(ユニット, attackerUnitID, "サイズ") != "L", (杖基礎経験値 + 未撃破経験値), ((杖基礎経験値 + 未撃破経験値) \ 2))
+Case "踊る"
+    Set exp (未撃破経験値 + 5)
+Case Else
+    If (Status(defenderUnitID) != "破壊") And (破壊キャンセル状態[defenderUnitID] != 1) Then
+        //非撃墜
+        Set exp 未撃破経験値
+	Else
+        //撃墜
+        //ボス修正
+        Local ボス修正 = 0
+        If Info(ユニット, defenderUnitID, 特殊能力所有, "ボス") Then
+            Set ボス修正 40
+        EndIf
+        //基礎撃破経験値 ＝（相手のLV×相手のクラスの強さ＋相手の階級修正B）－（自分のLV×自分のクラスの強さ＋自分の階級修正B)
+        Local 基礎撃破経験値 = (Info(パイロット, PilotID(defenderUnitID), レベル) * defenderStrong + Info(ユニット, defenderUnitID, "経験値")) - (Info(パイロット, PilotID(attackerUnitID), レベル) * attackerStrong + Info(ユニット, attackerUnitID, "経験値"))
+        //撃破経験値 ＝未撃破経験値＋max（0，基礎撃破経験値＋20＋ボス修正)
+        Local 撃破経験値 = (未撃破経験値 + Max(0, (基礎撃破経験値 + 20 + ボス修正)))
+        Set exp 撃破経験値
+    EndIf
+EndSw
+If Info(パイロット, PilotID(attackerUnitID), 特殊能力所有, "素質") Then
+    Set exp (exp * 2)
+EndIf
+Return IIf(exp < 100, exp, 100)
+
+
+// スキルの発動を判定します。
+スキル発動判定:
+Local target = Args(1)
+Local weapon = Args(2)
+Local enemy = Args(3)
+Local enemyWeapon = Args(4)
+
+Local 発動確率
+
+If Info(ユニット, UnitID(enemy), 武器, enemyWeapon, 属性所有, "見") = 0 Then
+    If Info(ユニット, UnitID(target), 武器, weapon, 属性所有, "月") Then
+        Set 月光発動[target]
+    EndIf
+    If Info(ユニット, UnitID(target), 武器, weapon, 属性所有, "太") Then
+        Set 太陽発動[target]
+    EndIf
+    If Info(ユニット, UnitID(target), 武器, weapon, 属性所有, "怒") Then
+        If (HP(target) / Info(ユニット, UnitID(target), 最大ＨＰ)) <= 0.5 Then
+            Set 怒り発動[target]
+        EndIf
+    EndIf
+EndIf
+If Info(パイロット, enemy, 特殊能力所有, "見切り") = 0 Then
+    //月光
+    If (月光発動[target] != 1) And Info(パイロット, target, 特殊能力所有, "月光") Then
+        If Info(ユニット, UnitID(target), 特殊能力所有, "月光確率") Then
+            Set 発動確率 Info(ユニット, UnitID(target), 特殊能力解説, "月光確率")
+            Set 発動確率 Replace(発動確率, "攻撃側", "target")
+            Set 発動確率 Eval(Replace(発動確率, "防御側", "enemy"))
+        Else
+            Set 発動確率 Info(パイロット, target, ステータス技)
+        EndIf
+        Set 月光発動[target] IIf(Random(100) <= 発動確率, 1, 0)
+    EndIf
+    
+    //太陽
+    If (太陽発動[target] != 1) And Info(パイロット, target, 特殊能力所有, "太陽") Then
+        If Info(ユニット, UnitID(target), 特殊能力所有, "太陽確率") Then
+            Set 発動確率 Info(ユニット, UnitID(target), 特殊能力解説, "太陽確率")
+            Set 発動確率 Replace(発動確率, "攻撃側", "target")
+            Set 発動確率 Eval(Replace(発動確率, "防御側", "enemy"))
+        Else
+            Set 発動確率 Info(パイロット, target, ステータス技)
+        EndIf
+        Set 太陽発動[target] IIf(Random(100) <= 発動確率, 1, 0)
+    EndIf
+    
+    //怒り
+    If (怒り発動[target] != 1) And Info(パイロット, target, 特殊能力所有, "怒り") Then
+        If (HP(target) / Info(ユニット, UnitID(target), 最大ＨＰ)) <= 0.5 Then
+            Set 怒り発動[target]
+        EndIf
+    EndIf
+EndIf
+Return
+
+
+// 連続の発動を判定します。
+連続発動判定:
+Local target = Args(1)
+Local weapon = Args(2)
+Local enemy = Args(3)
+Local enemyWeapon = Args(4)
+
+Local 発動確率
+
+If Info(パイロット, enemy, 特殊能力所有, "見切り") = 0 Then
+    //連続
+    If Info(パイロット, target, 特殊能力所有, "連続") Then
+        If Info(ユニット, UnitID(target), 特殊能力所有, "連続確率") Then
+            Set 発動確率 Info(ユニット, UnitID(target), 特殊能力解説, "連続確率")
+            Set 発動確率 Replace(発動確率, "攻撃側", "target")
+            Set 発動確率 Eval(Replace(発動確率, "防御側", "enemy"))
+        Else
+            Set 発動確率 Info(パイロット, target, ステータス技)
+        EndIf
+        Set 連続発動[target] IIf(Random(100) <= 発動確率, 1, 0)
+    EndIf
+EndIf
+Return
+
+
+
+
+FEトライアングルアタック判定:
+//トライアングルアタックが可能かどうかを調べる
+Local target = Args(1)
+Local enemy = Args(2)
+Set target IIf(IsDefined(target, パイロット), UnitID(target), target)
+Set enemy  IIf(IsDefined(enemy,  パイロット), UnitID(enemy),  enemy)
+Local result = 0
+If target != "" And enemy != "" Then
+    If Not IsVarDefined(FEトライアングルアタック発動) Then
+    	If フェイズ = Party(target) Then
+		    If Abs(X(PilotID(target)) - X(PilotID(enemy))) + Abs(Y(PilotID(target)) - Y(PilotID(enemy))) <= 1 Then
+		        If Skill(PilotID(target), トライアングルアタック) != 0 Then
+		            Local 人数 = 0
+		            Incr 人数 FEトライアングルアタック所持確認(target, Info(マップ, X(enemy)    , Y(enemy) - 1, ユニットＩＤ))
+		            Incr 人数 FEトライアングルアタック所持確認(target, Info(マップ, X(enemy) + 1, Y(enemy)    , ユニットＩＤ))
+		            Incr 人数 FEトライアングルアタック所持確認(target, Info(マップ, X(enemy)    , Y(enemy) + 1, ユニットＩＤ))
+		            Incr 人数 FEトライアングルアタック所持確認(target, Info(マップ, X(enemy) - 1, Y(enemy)    , ユニットＩＤ))
+		            If 3 <= 人数 Then
+		                #トライアングルアタック実行（クリティカル率を100％に）
+		                Set result
+		            EndIf
+		        EndIf
+		    EndIf
+        EndIf
+	EndIf
+Else
+    Talk
+    サブルーチン「FEトライアングルアタック判定」の引数の数が不正です
+    End
+EndIf
+Return result
+
+
+
+
+FEトライアングルアタック所持確認:
+//攻撃者と同じレベルの特殊能力「トライアングルアタック」を持っているか確認する
+Local attacker = Args(1)
+Local target = Args(2)
+Set attacker IIf(IsDefined(attacker, ユニット), PilotID(attacker), attacker)
+Set target   IIf(IsDefined(target,   ユニット), PilotID(target),   target)
+Local result = 0
+If attacker != "" Then
+    If Party(target) = Party(attacker) Then
+        If Skill(target, トライアングルアタック) = Skill(attacker, トライアングルアタック) Then
+            Set result 1
+        EndIf
+    EndIf
+Else
+    Talk
+    サブルーチン「FEトライアングルアタック所持確認」の引数の数が不正です
+    End
+EndIf
+Return result
+
+
+
+
+FEトライアングルアタック終了処理:
+UnSet FEトライアングルアタック発動
+Return

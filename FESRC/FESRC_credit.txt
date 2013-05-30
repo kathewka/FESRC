@@ -1,0 +1,41 @@
+素材を提供して頂いた全ての方にお礼申し上げます。
+皆様の素材がなければ作品は完成しませんでした。ありがとうございます。
+
+インクルード------------------------------------------------
+経験値加算効果音（音量を元音源より下げています）	exp.wav
+スキル発動効果音		special_attack.wav
+	音の葉っぱ～効果音・ジングル・BGMのフリー音素材集～
+		http://www.geocities.jp/spacheeg/
+
+ステータスＵＰ効果音	statusup.wav
+「踊る」コマンド効果音	dance.wav
+クラスチェンジＢＧＭ	class_change.mp3
+アイテム破損効果音		weapon_break.wav
+アイテム入手効果音		getitem.wav
+転送・送還効果音	warp.wav
+	効果音・BGMフリー音素材の01SoundEarth
+		http://www.01earth.net/sound/
+
+クリティカル効果音		ExplosionF@11.wav
+ノーダメージ効果音		nodamage.wav
+	WEB WAVE LIB 音と声のOnLine素材集 効果音を無料でダウンロード
+		http://www.s-t-t.com/wwl/
+
+レベルアップ効果音		levelup.wav
+	フリー効果音　On-Jin ～音人～
+		http://www.yen-soft.com/ssse/
+
+ウィンドウ背景			165_1.jpg　class_change.jpg
+	空彩
+		http://loo.sakura.ne.jp/
+
+ステータスＵＰエフェクト	Bitmap\Anime\Shower\EFFECT_shower01.gif～EFFECT_shower10.gif
+	SPIERAL WIND
+		http://spieralwind.tuzikaze.com/
+
+
+テストシナリオ----------------------------------------------
+マップＢＧＭ			Map1.mp3　ピルグリム.mp3
+イベントＢＧＭ			HHB_-Hurry_Honey_Bunny-.mp3
+	無料（フリー）BGM DOVA-SYNDROME
+		http://dova-s.jp/

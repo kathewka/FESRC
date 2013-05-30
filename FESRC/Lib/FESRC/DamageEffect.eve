@@ -1,0 +1,249 @@
+//==============================================================================
+// ｋａｔダメージ演出
+//------------------------------------------------------------------------------
+// 独自のダメージ演出を行う。
+// 引数でクリティカルか否かを指定できる。
+//------------------------------------------------------------------------------
+// in  : unitID
+//     : damage
+//     : isCritical クリティカルの時 0以外
+// out : void
+//==============================================================================
+ｋａｔダメージ演出:
+	Local unitID = args(1)
+	Local damage = args(2)
+	Local isCritical = args(3)
+	
+	Local ANIME_SPEED = 1
+	
+	Local HPpx
+	Set HPpx 8
+	Local HPpy
+	Set HPpy 35
+	Local damagePx
+	Set damagePx 25
+	Local damagePy
+	Set damagePy 20
+	Local HPsize
+	Set HPsize 35pt
+	Local damageSize
+	Set damageSize 25pt
+	Local color
+	Set color #FFFFFF
+	Local colorRed
+	Set colorRed 128
+	Local HPframeWidth
+	Set HPframeWidth 3
+	Local damageFrameWidth
+	Set damageFrameWidth 1
+	
+	// HPを表示する座標を設定
+	Font HPsize ゴシック Bold Italic
+	Local HPx HPy
+	Set HPx (WX(unitID) + HPpx - TextWidth(HP(unitID)))
+	Set HPy (WY(unitID) - HPpy)
+	
+	// 枠線の色を設定
+	Local frameColor
+	Switch Party(unitID)
+	Case 味方
+		Set frameColor #FF0000
+	Case ＮＰＣ
+		Set frameColor #8484FF
+	Case 敵
+		Set frameColor #FF6600
+	Case 中立
+		Set frameColor #66FF00
+	EndSw
+	
+	// ダメージを表示する座標を設定
+	Font damageSize ゴシック Bold Italic
+	Local damageX
+	Set damageX (WX(unitID) + (damagePx - TextWidth(damage)))
+	Local damageY
+	Set damageY (WY(unitID) + damagePy)
+	
+	Local fontColor = HP表示色取得(Info(unitID, 最大ＨＰ), HP(unitID))
+	
+	// クリティカル演出
+	If isCritical != 0 Then
+		PlayEffect 地面衝撃 unitID ExplosionF@11.wav
+	EndIf
+	
+	// HP描画
+	Call 斜め縁取り文字描画 HPx HPy HPsize fontColor ゴシック HPframeWidth frameColor HP(unitID) Bold Italic 通常
+	// ダメージ描画
+	Call 斜め縁取り文字描画 damageX damageY damageSize color ゴシック damageFrameWidth #8484FF ("-" & damage) Bold Italic 保持
+	
+	WhiteIn 5
+	// HP減
+	Local HP = HP(unitID)
+	Local HPdownSpeed
+	Set HPdownSpeed 1
+	Local tmp
+	Set tmp HP
+	Do While (100 <= tmp)
+		Set HPdownSpeed (HPdownSpeed * 10)
+		Set tmp (tmp \ 10)
+	Loop
+	Wait Start
+	For i = 0 To damage Step HPdownSpeed
+		If damage < i Then
+			Set i damage
+		EndIf
+		Set HP (HP(unitID) - i)
+		If HP <= 0 Then
+			Set HP 0
+		EndIf
+		Set fontColor HP表示色取得(Info(unitID, 最大ＨＰ), HP)
+		
+		Font HPsize ゴシック Bold Italic
+		Set HPx (WX(unitID) + HPpx - TextWidth(HP))
+		Set HPy (WY(unitID) - HPpy)
+		
+		ClearPicture
+		Call 斜め縁取り文字描画 HPx HPy HPsize fontColor ゴシック HPframeWidth frameColor HP Bold Italic 通常
+		Refresh
+		Wait Until ((i \ HPdownSpeed + 1) * ANIME_SPEED)
+		
+		If HP = 0 Then
+			Break
+		EndIf
+	Next
+	
+	Wait 3
+	Redraw
+Return
+
+
+//==============================================================================
+// 回復演出
+//------------------------------------------------------------------------------
+// 独自の回復演出を行う。
+//------------------------------------------------------------------------------
+// in  : unitID
+//     : 回復量
+// out : void
+//==============================================================================
+回復演出:
+	Local unitID = args(1)
+	Local 回復量 = args(2)
+	
+	Local HPpx
+	Set HPpx 8
+	Local HPpy
+	Set HPpy 35
+	Local damagePx
+	Set damagePx 25
+	Local damagePy
+	Set damagePy 20
+	Local HPsize
+	Set HPsize 35pt
+	Local damageSize
+	Set damageSize 25pt
+	Local color
+	Set color #FFFFFF
+	Local colorRed
+	Set colorRed 128
+	Local HPframeWidth
+	Set HPframeWidth 3
+	Local damageFrameWidth
+	Set damageFrameWidth 1
+	
+	// HPを表示する座標を設定
+	Font HPsize ゴシック Bold Italic
+	Local HPx HPy
+	Set HPx (WX(unitID) + HPpx - TextWidth(HP(unitID)))
+	Set HPy (WY(unitID) - HPpy)
+	
+	// 枠線の色を設定
+	Local frameColor
+	Switch Party(unitID)
+	Case 味方
+		Set frameColor #FF0000
+	Case ＮＰＣ
+		Set frameColor #8484FF
+	Case 敵
+		Set frameColor #FF6600
+	Case 中立
+		Set frameColor #66FF00
+	EndSw
+	
+	// ダメージを表示する座標を設定
+	Font damageSize ゴシック Bold Italic
+	Local damageX
+	Set damageX (WX(unitID) + (damagePx - TextWidth(回復量)))
+	Local damageY
+	Set damageY (WY(unitID) + damagePy)
+	
+	Local fontColor = HP表示色取得(Info(unitID, 最大ＨＰ), HP(unitID))
+	
+	// クリティカル演出
+	If isCritical != 0 Then
+		PlayEffect 地面衝撃 unitID ExplosionF@11.wav
+	EndIf
+	
+	// HP描画
+	Call 斜め縁取り文字描画 HPx HPy HPsize fontColor ゴシック HPframeWidth frameColor HP(unitID) Bold Italic 通常
+	// ダメージ描画
+	Call 斜め縁取り文字描画 damageX damageY damageSize color ゴシック damageFrameWidth #8484FF ("+" & 回復量) Bold Italic 保持
+	
+	WhiteIn 5
+	// HP増
+	Local HP = HP(unitID)
+	Local HPupSpeed
+	Set HPupSpeed 1
+	Local tmp
+	Set tmp HP
+	Do While (100 <= tmp)
+		Set HPupSpeed (HPupSpeed * 10)
+		Set tmp (tmp \ 10)
+	Loop
+	For i = 0 To 回復量 Step HPupSpeed
+		If 回復量 < i Then
+			Set i 回復量
+		EndIf
+		Set HP (HP(unitID) + i)
+		If Info(unitID, 最大ＨＰ) <= HP Then
+			Set HP Info(unitID, 最大ＨＰ)
+		EndIf
+		Set fontColor HP表示色取得(Info(unitID, 最大ＨＰ), HP)
+		
+		Font HPsize ゴシック Bold Italic
+		Set HPx (WX(unitID) + HPpx - TextWidth(HP))
+		Set HPy (WY(unitID) - HPpy)
+		
+		ClearPicture
+		Call 斜め縁取り文字描画 HPx HPy HPsize fontColor ゴシック HPframeWidth frameColor HP Bold Italic 通常
+		Refresh
+		Wait 0.5
+		
+		If HP = Info(unitID, 最大ＨＰ) Then
+			Break
+		EndIf
+	Next
+	
+	Wait 3
+	Redraw
+Return
+
+
+//==============================================================================
+// ｋａｔHP表示色取得
+//------------------------------------------------------------------------------
+// HPの表示色を取得する
+//------------------------------------------------------------------------------
+// in  : maxHP
+//     : HP
+// out : void
+//==============================================================================
+HP表示色取得:
+ｋａｔHP表示色取得:
+	Local maxHP = args(1)
+	Local HP = args(2)
+	
+	Local colorRed
+	Set colorRed 128
+	
+	Local fontColor = 255 - (colorRed - (colorRed * (HP / maxHP)))
+Return RGB(255, fontColor, fontColor)

@@ -1,0 +1,188 @@
+縁取り文字:
+//縁取り文字描画のリファイン版。いずれソース全体でこちらを使うように差し替えたい
+Local x = args(1)
+Local y = args(2)
+Local message = args(3)
+Local fontColor = args(4)
+Local frameColor = args(5)
+Local frameWidth = args(6)
+
+Font frameColor
+Local i j
+For i = (frameWidth * -1) To frameWidth
+    For j = (frameWidth * -1) To frameWidth
+        PaintString (x + i) (y + j) message
+    Next
+Next
+Font fontColor
+PaintString x y message
+Return
+
+//==============================================================================
+// ｋａｔ影付き文字描画
+//------------------------------------------------------------------------------
+// 影付きの文字を描画します。
+//------------------------------------------------------------------------------
+// in  : x
+//     : y
+//     : size
+//     : fontColor
+//     : family フォントファミリー
+//     : shadowMargin 影のズレの大きさ
+//     : shadowColor
+//     : message
+//     : opt フォントオプション
+// out : void
+//==============================================================================
+影付き文字描画:
+ｋａｔ影付き文字描画:
+    Local x = args(1)
+    Local y = args(2)
+    Local size = args(3)
+    Local fontColor = args(4)
+    Local family = args(5)
+    Local shadowMargin = args(6)
+    Local shadowColor = args(7)
+    Local message = args(8)
+    Local optA = args(9)
+    Local optB = args(10)
+    Local optC = args(11)
+    
+    Font size shadowColor family optA optB optC
+    PaintString (x + shadowMargin) (y + shadowMargin) message
+    Font size fontColor family optA optB optC
+    PaintString x y message
+    
+    // フォント情報初期化
+    Font
+Return
+
+
+//==============================================================================
+// ｋａｔ斜め縁取り文字描画
+//------------------------------------------------------------------------------
+// 斜めにのみ縁取りをした文字を描画します。
+//------------------------------------------------------------------------------
+// in  : x
+//     : y
+//     : size
+//     : fontColor
+//     : family フォントファミリー
+//     : frameWidth 縁の太さ
+//     : frameColor
+//     : message
+//     : opt フォントオプション
+// out : void
+//==============================================================================
+斜め縁取り文字描画:
+ｋａｔ斜め縁取り文字描画:
+    Local x = args(1)
+    Local y = args(2)
+    Local size = args(3)
+    Local fontColor = args(4)
+    Local family = args(5)
+    Local frameWidth = args(6)
+    Local frameColor = args(7)
+    Local message = args(8)
+    Local optA = args(9)
+    Local optB = args(10)
+    Local optC = args(11)
+    
+    Font size frameColor family optA optB optC
+    
+    Local i
+    For i = (frameWidth * -1) To frameWidth
+        PaintString (x + i) (y + i) message
+    Next
+    Font size fontColor family optA optB optC
+    PaintString x y message
+    
+    // フォント情報初期化
+    Font
+Return
+
+
+//==============================================================================
+// ｋａｔ縁取り文字描画
+//------------------------------------------------------------------------------
+// 縁取りをした文字を描画します。
+//------------------------------------------------------------------------------
+// in  : x
+//     : y
+//     : size
+//     : fontColor
+//     : family フォントファミリー
+//     : frameWidth 縁の太さ
+//     : frameColor
+//     : message
+//     : opt フォントオプション
+// out : void
+//==============================================================================
+縁取り文字描画:
+ｋａｔ縁取り文字描画:
+    Local x = args(1)
+    Local y = args(2)
+    Local size = args(3)
+    Local fontColor = args(4)
+    Local family = args(5)
+    Local frameWidth = args(6)
+    Local frameColor = args(7)
+    Local message = args(8)
+    Local optA = args(9)
+    Local optB = args(10)
+    Local optC = args(11)
+    
+    Font size frameColor family optA optB optC
+    
+    Local i j
+    For i = (frameWidth * -1) To frameWidth
+        For j = (frameWidth * -1) To frameWidth
+            PaintString (x + i) (y + j) message
+        Next
+    Next
+    Font size fontColor family optA optB optC
+    PaintString x y message
+    
+    // フォント情報初期化
+    Font
+Return
+
+
+//==============================================================================
+// ｋａｔトースト描画
+//------------------------------------------------------------------------------
+// トースト（Toast）を表示します。
+//------------------------------------------------------------------------------
+// in  : text
+//       color
+// out : void
+//==============================================================================
+トースト描画:
+ｋａｔトースト描画:
+    Local text = args(1)
+    Local color = args(2)
+	
+	Local ANIME_SPEED = 0.7
+    
+    //文字情報
+    Local DX = 470 // 右側の座標
+    Local DY = 375
+    Local FONT_SIZE = 20pt
+    Local FONT_FRAME_WIDTH = 3
+    //背景情報
+    Local BACKGROUND = "Event\ichimatsu.gif"
+    Local BACKGROUND_DX = 455
+    Local BACKGROUND_DY = 375
+    
+    Font FONT_SIZE ゴシック Regular
+    Local sw = (TextWidth(text) / 2 + (4 - TextWidth(text) / 2 Mod 4))
+    Local sh = (TextHeight(あ) / 2 + (4 - TextHeight(あ) / 2 Mod 4))
+    PaintPicture BACKGROUND (BACKGROUND_DX - TextWidth(text)) BACKGROUND_DY TextWidth(text) TextHeight(あ) 0 0 sw sh 透過 #000000 フィルタ color 50% 保持
+	Wait Start
+    For i = 0 To 255 Step 20
+        Font FONT_SIZE ゴシック Regular
+        Call ｋａｔ縁取り文字描画 (DX - TextWidth(text)) DY FONT_SIZE RGB(i, i, i) ゴシック FONT_FRAME_WIDTH color text Regular 通常
+        Refresh
+        Wait Until ((i \ 20 + 1) * ANIME_SPEED)
+    Next
+Return

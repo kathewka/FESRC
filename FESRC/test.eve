@@ -1,0 +1,293 @@
+@Test
+@FESRC
+@FETalk
+
+マップコマンド FEAttack実行（反撃なし） (Status(テスタ) = 出撃):
+ForEach 敵
+    Set テスト仮想敵 対象パイロット
+	Break
+Next
+ForEach 味方
+    Set テスト味方 対象パイロット
+	Break
+Next
+FEAttack テスト味方 自動 テスト仮想敵 防御
+Exit
+
+マップコマンド FEAttack実行（反撃あり） (Status(テスタ) = 出撃):
+ForEach 敵
+    Set テスト仮想敵 対象パイロット
+	Break
+Next
+ForEach 味方
+    Set テスト味方 対象パイロット
+	Break
+Next
+FEAttack テスト味方 自動 テスト仮想敵 自動
+Exit
+
+スタート:
+#    Set FETalk文字サイズ 12pt
+#    Option デバッグ
+    IntermissionCommand キャンプ "Lib\FESRC\Camp.eve"
+    Set キャンプＢＧＭ "Test\Map1.mp3"
+    Set キャンプオブジェ "焚き火"
+#    FEOption アイテム破損無効
+#    FEOption 再移動無効
+    FEOption 武器盗み可
+#    FEOption ドロップアイテム可視化
+    FEOption ＣＴダメージ３倍
+#    Set ウィンドウ画像 "nor_oth008_1.jpg"
+#    Set FETalkウィンドウ画像 "nor_oth008_1.jpg"
+#    Set ショップＢＧＭ "Test\HHB_-Hurry_Honey_Bunny-.mp3"
+#    Set ショップ背景 white.GIF
+    
+    StartBGM "Test\HHB_-Hurry_Honey_Bunny-.mp3"
+    Money 10000
+    FECreate 味方 テストファイター テスタ 1 3 4
+    Equip 鉄の剣
+    Equip カタール
+    Equip グレートソード
+    Equip 鉄の槍
+    Equip 斬鉄の剣
+    Equip 魔法剣
+    FECreate 味方 テストアーチャー テスチャー 1 4 3
+    Equip 鉄の弓
+    Item 鉄の弓
+    Equip 鉄の弓
+    Equip フレイマー
+    Equip 英雄の証
+    Equip オリオンの矢
+    FECreate 味方 テスト魔道士 テスカ 10 2 3
+    Equip ウィンド
+    Equip マスタープルフ
+    Equip ライフ
+	Equip サイレス
+    Equip 転送の杖
+	Equip 修復の杖
+    FECreate 味方 テストソシアルナイト テストー 1 2 5
+    Item 鉄の槍
+    Equip 鉄の槍
+    Item 鉄の剣
+    Equip 鉄の剣
+    Equip 騎士の勲章
+	Item 修復の杖
+	Equip 修復の杖
+    FECreate 味方 テストペガサスナイト テサ 1 3 2
+    Equip 細身の槍
+    Equip 手槍
+    Item 鉄の剣
+    Equip 鉄の剣
+    Equip 飛竜の笛
+    Item 傷薬
+    Equip 傷薬
+    Equip 連続の剣
+    FECreate 味方 テスト踊り子 テルー 1 1 4
+    Item 鉄の剣
+    Equip 鉄の剣
+    Item 傷薬
+    Equip 傷薬
+    FECreate 味方 テスト盗賊(女) テイシー 1 1 2
+    Item 鉄の剣
+    Equip 鉄の剣
+    Item 傷薬
+    Equip 傷薬
+    FECreate 味方 テスト獣人 テスジュウ 1 2 1
+    Item 鉄の剣
+    Equip 鉄の剣
+    Item 傷薬
+    Equip 傷薬
+    FECreate 味方 テスト輸送隊 テスユ 1 4 1
+    Equip ファイアー
+	Equip スリープ
+	Equip バーサーク
+	Equip 送還の杖
+	Equip 重い剣
+	Equip なまくら
+    FECreate 味方 テストペガサスナイト ティーペ 1 6 2
+    Item 細身の槍
+	Equip 細身の槍
+	Item 手槍
+    Equip 手槍
+    FECreate 味方 テストペガサスナイト テテス 1 6 4
+    Item 細身の槍
+	Equip 細身の槍
+	Item 手槍
+    Equip 手槍
+
+    
+    FECreate 敵 テストパラディン テストナイト(ザコ) 2 10 2
+    Equip なまくら
+    Equip 鉄の槍
+    Equip 傷薬
+    FECreate 敵 テストアーマーナイト テストアーマー(ザコ) 2 9 2
+    Equip 鉄の槍
+    Equip 傷薬
+    Equip 鉄の槍
+    Equip 鉄の剣
+    Equip 手槍
+    Equip 細身の槍
+    FEドロップ 手槍
+    
+    FECreate 敵 テスト山賊 テストサン(ザコ) 2 4 14
+    Equip 鉄の斧
+    FECreate 敵 テスト大山賊 テストサン(ザコ) 2 9 8
+    Equip 鉄の斧
+    FECreate 敵 テスト山賊 テストサン(ザコ) 2 13 7
+    Equip 鉄の斧
+    FECreate 敵 テスト大山賊 テストサン(ザコ) 2 4 18
+    Equip 鉄の斧
+    ChangeMode 待機
+    FECreate 敵 テスト大山賊 テストサン(ザコ) 2 11 16
+    Equip 鉄の斧
+    ChangeMode 待機
+    FECreate 敵 テスト大山賊 テストサン(ザコ) 2 16 10
+    Equip 鉄の斧
+    ChangeMode 待機
+    FECreate 敵 テスト大山賊 テストサン(ザコ) 2 17 18
+    Equip 鉄の斧
+    ChangeMode 待機
+    FECreate 敵 テスト大山賊 テストボス 2 19 17 "ボス"
+    Equip 鉄の斧
+    ChangeMode 固定
+    
+    Call Ｐ－Ｄｅ＝Ｄ一括装備 全
+    
+    // ショップ準備
+    Create 中立 店主Ｕ 0 店主(汎用) 1 6 3 非同期
+    Equip 鉄の剣
+    Equip 鉄の斧
+    Equip 鉄の槍
+    Equip ファイアー
+    Equip ウィンド
+    Equip 細身の槍
+    Equip 手槍
+    Equip 斬鉄の剣
+    Equip 傷薬
+    Equip ライフ
+    Equip 先制の剣
+    Equip フュリー
+    Equip サンソード
+    Equip ムーンソード
+    Call ショップ作成
+    
+    FETalkL テスタ テスチャー テスカ
+    FETalkR テサ テストー
+    Center テスタ
+    FETalk テサ "テスタ！;大変、山賊に囲まれているわ！"
+    FETalk テスタ "なんだって！;:どうしよう、今の僕達の戦力では‥"
+    FETalk テストー "大丈夫だろう。連中、数は多いが、腕は大した事なさそうだ"
+    FETalk テストー "ただ、何人か騎士崩れが混じっているな。あいつらの槍には気をつけなければならないだろう"
+    FETalk テスタ "だったら、斧を持った山賊には僕達で対処しよう。;:槍を持った相手には斧が有効だけど、僕達に斧を扱える仲間はいない"
+    FETalk テスタ "騎士には弓と魔法で応戦しよう。頼めるかい、テスチャー、テスカ？"
+    FETalk テスチャー "大丈夫だよ。あんな奴ら、僕のフレイマーでイチコロさ"
+    FETalk テスカ(発言) "まかせて"
+    FETalk テスタ "よし、行くぞ、皆！"
+    FEEnd
+    Wait 5
+    Set ステージＢＧＭ "Test\Map1.mp3"
+    StartBGM ステージＢＧＭ
+    KeepBGM
+    
+    FERestoreEvent "攻撃_テサ_テストサン(ザコ)"
+    FERestoreEvent "攻撃_テサ_敵"
+    FERestoreEvent "*攻撃_テストペガサスナイト_敵"
+    FERestoreEvent "攻撃後_テサ_敵"
+    FERestoreEvent "損傷率_テサ_50"
+    FERestoreEvent "破壊_テサ"
+    FERestoreEvent "破壊_テストボス"
+    SetStatus テサ 破壊キャンセル -1
+Exit
+
+攻撃_テサ_敵:
+    FEClearEvent "攻撃_テサ_敵"
+    FETalk テサ "ボッコボコにしてやるわ！"
+    FEEnd
+Return
+
+攻撃_テサ_テストサン(ザコ):
+    FEClearEvent "攻撃_テサ_テストサン(ザコ)"
+    FETalk テサ "ギッチョンギッチョンにしてやるわ！"
+    FETalk テストサン(ザコ) な、なんだぁ！？
+    FEEnd
+Return
+
+*攻撃_テストペガサスナイト_敵:
+If FEトライアングルアタック判定(対象ユニットＩＤ, 相手ユニットＩＤ) Then
+	FEClearEvent "*攻撃_テストペガサスナイト_敵"
+    FETalkL テサ
+    FETalkR テテス ティーペ
+    FETalk テテス "お姉さま、アレをやるわ！"
+    FETalk テサ "ええ、よくってよ！"
+    FETalk ティーペ "スーパー‥:;トライアングル、アターーーーック！"
+	FEEnd
+EndIf
+Return
+
+攻撃後_テサ_敵:
+    FEClearEvent "攻撃後_テサ_敵"
+    FETalk テサ "チィ、しぶとい！"
+    FEEnd
+Return
+
+損傷率_テサ_50:
+    FEClearEvent "損傷率_テサ_50"
+    FETalk テサ "痛ッ！;やってくれるじゃない！"
+    FEEnd
+Return
+
+破壊_テサ:
+    FETalk テサ "嘘‥　そんな"
+    FEEnd
+    Destroy テサ
+Return
+
+再開:
+    StartBGM ステージＢＧＭ
+Exit
+
+破壊_テストボス:
+    FETalkL テスタ テイシー テスカ
+    FETalkR テサ テストー
+    Center テスタ
+    FETalk テスタ "ふう;危ないところだった"
+    FETalk テイシー "なんとかなるものね"
+    FETalk テスタ "山賊の仲間が駆けつけてきたら大変だ。先を急ごう"
+    FEEnd
+Continue test2.eve
+
+*ターン 全 敵:
+    If (3 <= ターン数) And (ターン数 <= 8) Then
+        FECreate 敵 テストソシアルナイト テストナイト(ザコ) 2 10 2
+        Equip 鉄の槍
+        Equip 傷薬
+        If (ターン数 Mod 3) = 0 Then
+            FECreate 敵 テストアーマーナイト テストアーマー(ザコ) 2 9 2
+            Equip 鉄の槍
+            Equip 傷薬
+            Equip 鉄の槍
+            Equip 鉄の剣
+            Equip 手槍
+            Equip 細身の槍
+        EndIf
+        Call Ｐ－Ｄｅ＝Ｄ一括装備 敵
+    EndIf
+    
+    If (敵数 <= 3) And (6 <= ターン数) And (Status(テストボス) != "破壊") Then
+        FECreate 敵 テスト大山賊 テストサン(ザコ) 2 20 14
+        Equip 鉄の斧
+        Equip 傷薬
+        FECreate 敵 テスト大山賊 テストサン(ザコ) 2 20 15
+        Equip 鉄の斧
+        FECreate 敵 テスト大山賊 テストサン(ザコ) 2 20 8
+        Equip 鉄の斧
+        Call Ｐ－Ｄｅ＝Ｄ一括装備 敵
+    EndIf
+Exit
+
+*ターン 全 味方:
+    Call ｋａｔトースト描画 "プレイヤーフェイズ" #FF6600
+Exit
+
+マップコマンド インターミッションに行く:
+Continue test2.eve

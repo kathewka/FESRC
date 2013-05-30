@@ -1,0 +1,116 @@
+@MELTライブラリ
+
+*スタート:
+	MELT_ChangeMap IIf(キャンプマップ != "", キャンプマップ, "Map\CampGrasses.map") 非同期
+	If キャンプＢＧＭ != "" Then
+		StartBGM キャンプＢＧＭ
+	Else
+		StartBGM Map1.mp3
+	EndIf
+	KeepBGM
+	
+	// 味方すべてランダムに配置
+	Local 配置Ｘ 配置Ｙ
+	ForEach 味方 待機
+		Do
+			Set 配置Ｘ Random(Info(マップ, 幅))
+			Set 配置Ｙ Random(Info(マップ, 高さ))
+		Loop While (配置可否チェック(対象ユニットＩＤ, 配置Ｘ, 配置Ｙ) = 0)
+		Launch 対象パイロット 配置Ｘ 配置Ｙ 非同期
+		Item 移動力＋６０
+		Equip 移動力＋６０
+	Next
+	If キャンプオブジェ = "" Then
+		Set キャンプオブジェ "オブジェ"
+	EndIf
+	Create ＮＰＣ キャンプオブジェ 0 キャンプオブジェ 1 (Info(マップ, 幅) \ 2 + Info(マップ, 幅) Mod 2) (Info(マップ, 高さ) \ 2 + Info(マップ, 高さ) Mod 2)
+	ChangeMode "固定"
+	
+	Set キャンプ中
+Exit
+
+*ターン 全 味方:
+Center キャンプオブジェ
+Exit
+
+*行動終了 味方:
+	Action() = Action() + 1
+	Redraw
+Exit
+
+*エピローグ:
+	ForEach 味方 全て
+		RemoveItem 対象パイロット 移動力＋６０
+	Next
+Exit
+
+*再開:
+	MELT_QuickLoadDraw
+Exit
+
+マップコマンド キャンプを出る:
+	Continue
+Exit
+
+ユニットコマンド "呼ぶ" 味方:
+	Local nameList = ""
+    Local idList = ""
+	Local myName
+	Set myName 対象パイロット
+	ForEach 味方 出撃
+		If 対象パイロット != myName Then
+			Set nameList (nameList & Info(パイロット, 対象パイロット, 愛称) & ",")
+            Set idList (idList & 対象ユニットＩＤ & " ")
+		EndIf
+	Next
+	Local nameArr
+	Array nameArr nameList ","
+#	UnSet nameArr[Count(nameArr)]
+    Local idArr
+    Array idArr idList リスト
+	Ask nameArr "誰を呼びますか？" キャンセル可
+	If 選択 != "" Then
+		Move idArr[選択] X(myName) Y(myName) アニメ表示
+	EndIf
+Exit
+
+マップコマンド 呼ぶ:
+Local nameList = ""
+Local idList = ""
+ForEach 味方 出撃
+	Set nameList (nameList & Info(パイロット, 対象パイロット, 愛称) & ",")
+    Set idList (idList & 対象ユニットＩＤ & " ")
+Next
+Local nameArr
+Array nameArr nameList ","
+Local idArr
+Array idArr idList リスト
+Ask nameArr "誰を呼びますか？" キャンセル可
+If 選択 != "" Then
+	Move idArr[選択] X(目標地点) Y(目標地点) アニメ表示
+EndIf
+Exit
+Return
+
+配置可否チェック:
+Local target = Args(1)
+Local x = Args(2)
+Local y = Args(3)
+
+Local res = 0
+
+# 地形タイプと移動可能地形が合致
+Local movable = Info(target, 移動可能地形)
+Local terrainType = Info(マップ, x, y, 地形タイプ)
+If InStr(movable, terrainType) Then
+	Set res
+EndIf
+
+# または空タイプのユニットでなおかつ壁の中以外
+Local cost = Info(マップ, x, y, 移動コスト)
+If res = 0 Then
+	If InStr(movable, "空") And cost != "-" Then
+		Set res
+	EndIf
+EndIf
+Return res

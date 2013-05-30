@@ -1,0 +1,525 @@
+*プロローグ:
+Global FETalk初期化
+If FETalk初期化 != 1 Then
+    Global FETalkウィンドウ画像
+    Set FETalkウィンドウ画像 "Event\165_1.jpg"
+    Global メッセージ速度
+    Set メッセージ速度 2
+    Set FETalk初期化
+EndIf
+Exit
+
+
+//==============================================================================
+// FETalk
+//------------------------------------------------------------------------------
+// 引数で渡されたキャラクターが喋ります。
+//------------------------------------------------------------------------------
+// in  : character
+//       messages
+//       opt		PaintPictureのオプション
+//       shadow     影を付ける場合は"影"
+// out : void
+//==============================================================================
+FETalk:
+Local character = Args(1)
+Local messages = Args(2)
+Local opt = Args(3)
+Local shadow = Args(4)
+
+Local characterName = Replace(IIf(InStr(character, "("), Replace(character, Mid(character, InStr(character, "(")), ""), character), "*", "")
+
+If 会話スキップ = 1 Then
+    Return
+EndIf
+
+// ウィンドウ画像
+Local WINDOW_BACKGROUND_IMAGE = FETalkウィンドウ画像
+// ウィンドウ共通設定
+Local WINDOW_FRAME_WIDTH = 2
+
+// インフォテキスト情報
+Local INFO_FONT_COLOR = #FFFFFF
+Local INFO_FONT_FRAME_COLOR = #000000
+Local INFO_SPEED_FRAME_COLOR = #0000CC
+Local INFO_SKIP_FRAME_COLOR = #99CC00
+Local INFO_FONT_SIZE = 8pt
+Local INFO_NUMBER_SIZE = 9pt
+Local INFO_SKIP_SIZE = 9pt
+Local INFO_FONT_FRAME_WIDTH = 1
+Local INFO_TEXT_SPEED = "メッセージはやさ"
+Local INFO_TEXT_SKIP = "スキップ"
+Local INFO_SPEED_DX = 271
+Local INFO_SPEED_DY = 440
+Local INFO_NUMBER_DX = 271
+Local INFO_NUMBER_DY = 454
+Local INFO_SKIP_DX = 424 // 右側の座標
+Local INFO_SKIP_DY = 454
+
+// テキスト情報
+Local FONT_SIZE = 16pt
+Local FONT_COLOR = #FFFFFF
+Local FONT_FRAME_COLOR = #000000
+Local FONT_FRAME_WIDTH = 1
+
+Local TEXT_SPEED = (メッセージ速度 * 0.3)
+
+Local MESSAGE_FRAME_DX = 15
+Local MESSAGE_FRAME_DY = 264
+Local MESSAGE_FRAME_DW = 450
+Local MESSAGE_FRAME_DH = 202
+Local MESSAGE_FRAME_WIDTH = 10
+Local MESSAGE_DX = 25
+Local MESSAGE_DY = 274
+Local MESSAGE_DW = 430
+Local MESSAGE_DH = 182
+Local MESSAGE_TEXT_DX = 25
+
+Local NAME_DX = 30
+Local NAME_DY = 290
+Local NAME_COLOR = "#FFFFFF"
+Local NAME_FRAME_COLOR = "#CC3300"
+
+Local CONFIG_FRAME_DX = 265
+Local CONFIG_FRAME_DY = 434
+Local CONFIG_FRAME_DW = 165
+Local CONFIG_FRAME_DH = 40
+
+Local FACE_FRAME_DX = 114
+Local FACE_FRAME_DY = 178
+Local FACE_FRAME_DW = 86
+Local FACE_FRAME_DH = 86
+Local FACE_DX = 116
+Local FACE_DY = 180
+Local FACE_DW = 82
+Local FACE_DH = 82
+Local FACE_MARGIN = 50
+
+Local RIGHT_FACE_FRAME_DX = 280
+Local RIGHT_FACE_DX = 282
+
+Local FADE_IN_STEP = 6
+Local FADE_IN_FINAL = 50
+Local FADE_IN_WAIT = 0.3
+
+Local size = IIf(IsVarDefined(FETalk文字サイズ), FETalk文字サイズ, FONT_SIZE)
+Font size
+Local lineHeight = (TextHeight(I) + 9)
+Local messageTextDY = (NAME_DY + lineHeight)
+
+Local 発言者位置
+Local 左更新 右更新
+// 以前の会話メンバーから変わりがあるかを確認する
+For i = 1 To 3
+    If キャラクター名左旧[i] != キャラクター名左[i] Then
+        Set 左更新
+        Set 発言方向 "左"
+        Break
+    EndIf
+Next
+For i = 1 To 3
+    If キャラクター名右旧[i] != キャラクター名右[i] Then
+        Set 右更新
+        Set 発言方向 "右"
+        Break
+    EndIf
+Next
+
+// 今回発言したいキャラクターが一覧にない時は、前回発言の方向と反対の側にキャラクターを入れる
+// "システム"が指定されている時はキャラクターを入れない
+Local キャラクター名 = ""
+If character != "システム" Then
+    Local tmp = ""
+    For i = 1 To 3
+        Set キャラクター名 Replace(IIf(InStr(キャラクター名左[i], "("), Replace(キャラクター名左[i], Mid(キャラクター名左[i], InStr(キャラクター名左[i], "(")), ""), キャラクター名左[i]), "*", "")
+        If キャラクター名 = characterName Then
+            Set tmp
+            Break
+        EndIf
+    Next
+    For i = 1 To 3
+        Set キャラクター名 Replace(IIf(InStr(キャラクター名右[i], "("), Replace(キャラクター名右[i], Mid(キャラクター名右[i], InStr(キャラクター名右[i], "(")), ""), キャラクター名右[i]), "*", "")
+        If キャラクター名 = characterName Then
+            Set tmp
+            Break
+        EndIf
+    Next
+    If tmp = "" Then
+        If 発言方向 = "左" Then
+            Set キャラクター名右[1] character
+            Set 発言方向 "右"
+            Set 右更新
+        Else
+            Set キャラクター名左[1] character
+            Set 発言方向 "左"
+            Set 左更新
+        EndIf
+    EndIf
+EndIf
+
+// 会話ウィンドウ描画
+If ウィンドウ作成済 != 1 Then
+    Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE MESSAGE_FRAME_DX MESSAGE_FRAME_DY MESSAGE_FRAME_DW MESSAGE_FRAME_DH WINDOW_FRAME_WIDTH
+    Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE MESSAGE_DX MESSAGE_DY MESSAGE_DW MESSAGE_DH WINDOW_FRAME_WIDTH "凹凸反転"
+EndIf
+
+// コンフィグウィンドウ描画
+If ウィンドウ作成済 != 1 Then
+    Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE CONFIG_FRAME_DX CONFIG_FRAME_DY CONFIG_FRAME_DW CONFIG_FRAME_DH WINDOW_FRAME_WIDTH
+    Call ｋａｔ縁取り文字描画 INFO_SPEED_DX INFO_SPEED_DY INFO_FONT_SIZE INFO_FONT_COLOR ゴシック INFO_FONT_FRAME_WIDTH INFO_SPEED_FRAME_COLOR INFO_TEXT_SPEED 保持
+EndIf
+Local numColor
+For k = 0 To 2
+    Font INFO_NUMBER_SIZE ゴシック
+    Set numColor IIf(k = メッセージ速度, #3399FF, INFO_FONT_COLOR)
+    ClearObj k
+    HotPoint k (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY TextWidth(Wide("あ")) TextHeight(Wide("あ")) Wide(k)
+    Call ｋａｔ縁取り文字描画 (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY INFO_NUMBER_SIZE numColor ゴシック INFO_FONT_FRAME_WIDTH INFO_FONT_FRAME_COLOR Wide(k) 通常
+Next
+Font INFO_SKIP_SIZE ゴシック
+ClearObj "スキップ"
+HotPoint "スキップ" (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY TextWidth(INFO_TEXT_SKIP) TextHeight(Wide("あ")) "スキップ"
+Call ｋａｔ縁取り文字描画 (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY INFO_SKIP_SIZE INFO_FONT_COLOR ゴシック INFO_FONT_FRAME_WIDTH INFO_SKIP_FRAME_COLOR INFO_TEXT_SKIP 通常
+
+Set ウィンドウ作成済
+
+// 顔グラフィック描画
+Local キャラグラ左 キャラグラ右
+For i = 1 To 3
+	If キャラクター名左[i] != "" Then
+		If Replace(キャラクター名左[i], "*", "") = Info(パイロット, Replace(キャラクター名左[i], "*", ""), 名称) Then
+			Set キャラグラ左[i] キャラクター名左[i]
+		Else
+			If IsDefined(Replace(キャラクター名左[i], "*", ""), パイロット) Then
+				Set キャラグラ左[i] Info(パイロット, Replace(キャラクター名左[i], "*", ""), グラフィック)
+			Else
+				Set キャラグラ左[i] Info(非戦闘員, Replace(キャラクター名左[i], "*", ""), グラフィック)
+			EndIf
+		EndIf
+	EndIf
+	If キャラクター名右[i] != "" Then
+		If Replace(キャラクター名右[i], "*", "") = Info(パイロット, Replace(キャラクター名右[i], "*", ""), 名称) Then
+			Set キャラグラ右[i] キャラクター名右[i]
+		Else
+			If IsDefined(Replace(キャラクター名右[i], "*", ""), パイロット) Then
+				Set キャラグラ右[i] Info(パイロット, Replace(キャラクター名右[i], "*", ""), グラフィック)
+			Else
+				Set キャラグラ右[i] Info(非戦闘員, Replace(キャラクター名右[i], "*", ""), グラフィック)
+			EndIf
+		EndIf
+	EndIf
+Next
+
+If 左更新 != 1 Then
+    For i = 0 To 2
+        Set キャラクター名 Replace(IIf(InStr(キャラクター名左[(3 - i)], "("), Replace(キャラクター名左[(3 - i)], Mid(キャラクター名左[(3 - i)], InStr(キャラクター名左[(3 - i)], "(")), ""), キャラクター名左[(3 - i)]), "*", "")
+        If キャラクター名 = characterName Then
+            Set 発言者位置 (3 - i)
+            Skip
+        ElseIf キャラクター名左[(3 - i)] != "" Then
+            Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (FACE_FRAME_DX - (2 - i) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+            PaintPicture Replace(キャラグラ左[(3 - i)], "*", "") (FACE_DX - (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH IIf(InStr(キャラクター名左[(3 - i)], "*"), "左右反転 暗", "暗") IIf(InStr(opt, "全適用"), opt, )
+			If shadow Like "影" && InStr(opt, "全適用") Then
+	            PaintPicture "Event\silhouette.gif" (FACE_DX - (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+			EndIf
+        EndIf
+    Next
+EndIf
+If 発言者位置 != "" Then
+    Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (FACE_FRAME_DX - (発言者位置 - 1) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+    PaintPicture Replace(キャラグラ左[発言者位置], "*", "") (FACE_DX - (発言者位置 - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH IIf(InStr(キャラクター名左[発言者位置], "*"), "左右反転", "") opt
+	If shadow Like "影" Then
+           PaintPicture "Event\silhouette.gif" (FACE_DX - (発言者位置 - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+	EndIf
+    Set 発言者位置 ""
+    Set 発言方向 "左"
+EndIf
+
+If 右更新 != 1 Then
+    For i = 0 To 2
+        Set キャラクター名 Replace(IIf(InStr(キャラクター名右[(3 - i)], "("), Replace(キャラクター名右[(3 - i)], Mid(キャラクター名右[(3 - i)], InStr(キャラクター名右[(3 - i)], "(")), ""), キャラクター名右[(3 - i)]), "*", "")
+        If キャラクター名 = characterName Then
+            Set 発言者位置 (3 - i)
+            Skip
+        ElseIf キャラクター名右[(3 - i)] != "" Then
+            Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (RIGHT_FACE_FRAME_DX + (2 - i) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+            PaintPicture Replace(キャラグラ右[(3 - i)], "*", "") (RIGHT_FACE_DX + (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH IIf(InStr(キャラクター名右[(3 - i)], "*"), "左右反転 暗", "暗") IIf(InStr(opt, "全適用"), opt, )
+			If shadow Like "影" && InStr(opt, "全適用") Then
+	            PaintPicture "Event\silhouette.gif" (RIGHT_FACE_DX + (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+			EndIf
+        EndIf
+    Next
+EndIf
+If 発言者位置 != "" Then
+    Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (RIGHT_FACE_FRAME_DX + (発言者位置 - 1) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+    PaintPicture Replace(キャラグラ右[発言者位置], "*", "") (RIGHT_FACE_DX + (発言者位置 - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH IIf(InStr(キャラクター名右[発言者位置], "*"), "左右反転", "") opt
+	If shadow Like "影" Then
+           PaintPicture "Event\silhouette.gif" (RIGHT_FACE_DX + (発言者位置 - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+	EndIf
+    Set 発言者位置 ""
+    Set 発言方向 "右"
+EndIf
+Refresh
+
+// 更新はフェードインさせる
+If (左更新 = 1) Or (右更新 = 1) Then
+    For j = FADE_IN_STEP To FADE_IN_FINAL Step FADE_IN_STEP
+        If 左更新 = 1 Then
+            ClearPicture 0 FACE_FRAME_DY 240 (FACE_FRAME_DY + FACE_FRAME_DH)
+            For i = 0 To 2
+                If キャラクター名左[(3 - i)] != "" Then
+                    Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (FACE_FRAME_DX - (2 - i) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+                    PaintPicture Replace(キャラグラ左[(3 - i)], "*", "") (FACE_DX - (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH フィルタ #000000 ((100 - j) & "%") IIf(InStr(キャラクター名左[(3 - i)], "*"), "左右反転", "") IIf(InStr(opt, "全適用"), opt, )
+					If shadow Like "影" Then
+				           PaintPicture "Event\silhouette.gif" (FACE_DX - (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+					EndIf
+                EndIf
+            Next
+        EndIf
+        If 右更新 = 1 Then
+            ClearPicture 240 FACE_FRAME_DY 480 (FACE_FRAME_DY + FACE_FRAME_DH)
+            For i = 0 To 2
+                If キャラクター名右[(3 - i)] != "" Then
+                    Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (RIGHT_FACE_FRAME_DX + (2 - i) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+                    PaintPicture Replace(キャラグラ右[(3 - i)], "*", "") (RIGHT_FACE_DX + (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH フィルタ #000000 ((100 - j) & "%") IIf(InStr(キャラクター名右[(3 - i)], "*"), "左右反転", "") IIf(InStr(opt, "全適用"), opt, )
+					If shadow Like "影" Then
+				           PaintPicture "Event\silhouette.gif" (RIGHT_FACE_DX + (2 - i) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+					EndIf
+                EndIf
+            Next
+        EndIf
+        Refresh
+        Wait FADE_IN_WAIT
+    Next
+EndIf
+For i = 1 To 3
+    Set キャラクター名 Replace(IIf(InStr(キャラクター名左[i], "("), Replace(キャラクター名左[i], Mid(キャラクター名左[i], InStr(キャラクター名左[i], "(")), ""), キャラクター名左[i]), "*", "")
+    If キャラクター名 = characterName Then
+        Set キャラクター名左[i] character
+        Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (FACE_FRAME_DX - (i - 1) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+        PaintPicture Replace(キャラグラ左[i], "*", "") (FACE_DX - (i - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH IIf(InStr(キャラクター名左[i], "*"), "左右反転", "") opt
+		If shadow Like "影" Then
+	           PaintPicture "Event\silhouette.gif" (FACE_DX - (i - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+		EndIf
+        Set 発言方向 "左"
+        Break
+    EndIf
+    Set キャラクター名 Replace(IIf(InStr(キャラクター名右[i], "("), Replace(キャラクター名右[i], Mid(キャラクター名右[i], InStr(キャラクター名右[i], "(")), ""), キャラクター名右[i]), "*", "")
+    If キャラクター名 = characterName Then
+        Set キャラクター名右[i] character
+        Call ｋａｔウィンドウ描画 WINDOW_BACKGROUND_IMAGE (RIGHT_FACE_FRAME_DX + (i - 1) * FACE_MARGIN) FACE_FRAME_DY FACE_FRAME_DW FACE_FRAME_DH WINDOW_FRAME_WIDTH "非保持"
+        PaintPicture Replace(キャラグラ右[i], "*", "") (RIGHT_FACE_DX + (i - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH IIf(InStr(キャラクター名右[i], "*"), "左右反転", "") opt
+		If shadow Like "影" Then
+	           PaintPicture "Event\silhouette.gif" (RIGHT_FACE_DX + (i - 1) * FACE_MARGIN) FACE_DY FACE_DW FACE_DH 透過
+		EndIf
+        Set 発言方向 "右"
+        Break
+    EndIf
+Next
+Refresh
+CopyArray キャラクター名左 キャラクター名左旧
+CopyArray キャラクター名右 キャラクター名右旧
+
+ClearPicture MESSAGE_TEXT_DX NAME_DY 480 430
+
+If Not messages = "" Then
+	//名前描画
+	If character != "システム" Then
+	    Call ｋａｔ縁取り文字描画 NAME_DX NAME_DY size NAME_COLOR ゴシック FONT_FRAME_WIDTH NAME_FRAME_COLOR IIf(IsDefined(characterName), Info(PilotID(UnitID(characterName)), 愛称), characterName) Regular 通常
+	EndIf
+
+	//テキスト描画
+	Font size ゴシック Regular
+	Local baseDx = (MESSAGE_TEXT_DX + TextWidth("（"))
+	Local baseDy = IIf(character != "システム", messageTextDY, NAME_DY)
+	Local dx = baseDx
+	Local dy = baseDy
+	//改行の整理
+	If Left(messages, 1) = "(" Then
+	    Call ｋａｔ縁取り文字描画 MESSAGE_TEXT_DX baseDy size FONT_COLOR ゴシック FONT_FRAME_WIDTH FONT_FRAME_COLOR "（" Regular 通常
+	    Local 脳内再生 = 1
+	Else
+	    If character != "システム" Then
+	        Call ｋａｔ縁取り文字描画 MESSAGE_TEXT_DX baseDy size FONT_COLOR ゴシック FONT_FRAME_WIDTH FONT_FRAME_COLOR "「" Regular 通常
+	    EndIf
+	EndIf
+	Local tmp
+	Set tmp ""
+	Font size
+	Local maxDY = (CONFIG_FRAME_DY - TextHeight(I))
+	Wait Start
+	Local 連続描画文字数 = 1
+	For i = IIf(脳内再生 = 1, 2, 1) To IIf(脳内再生 = 1, (Len(messages) - 1), Len(messages))
+	    If maxDY < dy Then
+	        Do
+	            Wait Click
+	            Switch 選択
+	            Case ""
+	                
+	            Case "スキップ"
+	                Set 会話スキップ
+	                Return
+	            Case Else
+	                Set メッセージ速度 選択
+	                Local numColor
+	                For k = 0 To 2
+	                    Font INFO_NUMBER_SIZE ゴシック
+	                    Set numColor IIf(k = メッセージ速度, #3399FF, INFO_FONT_COLOR)
+	                    ClearObj k
+	                    HotPoint k (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY TextWidth(Wide("あ")) TextHeight(Wide("あ"))
+	                    Call ｋａｔ縁取り文字描画 (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY INFO_NUMBER_SIZE numColor ゴシック INFO_FONT_FRAME_WIDTH INFO_FONT_FRAME_COLOR Wide(k) 通常
+	                Next
+	                Font INFO_SKIP_SIZE ゴシック
+	                ClearObj "スキップ"
+	                HotPoint "スキップ" (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY TextWidth(INFO_TEXT_SKIP) TextHeight(Wide("あ")) "スキップ"
+	                Call ｋａｔ縁取り文字描画 (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY INFO_SKIP_SIZE INFO_FONT_COLOR ゴシック INFO_FONT_FRAME_WIDTH INFO_SKIP_FRAME_COLOR INFO_TEXT_SKIP 通常
+	            EndSw
+	        Loop While (選択 != "")
+	        ClearPicture MESSAGE_TEXT_DX baseDy 480 430
+	        Set dy baseDy
+	    EndIf
+	    Set tmp Mid(messages, i, 1)
+	    Switch tmp
+	    Case ";" 
+	        Incr dy lineHeight
+	        Set dx baseDx
+	    Case ":"
+	        Do
+	            Wait Click
+	            Switch 選択
+	            Case ""
+	                Wait Start
+					Set 連続描画文字数 1
+	            Case "スキップ"
+	                Set 会話スキップ
+	                Return
+	            Case Else
+	                Set メッセージ速度 選択
+	                Local numColor
+	                For k = 0 To 2
+	                    Font INFO_NUMBER_SIZE ゴシック
+	                    Set numColor IIf(k = メッセージ速度, #3399FF, INFO_FONT_COLOR)
+	                    ClearObj k
+	                    HotPoint k (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY TextWidth(Wide("あ")) TextHeight(Wide("あ"))
+	                    Call ｋａｔ縁取り文字描画 (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY INFO_NUMBER_SIZE numColor ゴシック INFO_FONT_FRAME_WIDTH INFO_FONT_FRAME_COLOR Wide(k) 通常
+	                Next
+	                Font INFO_SKIP_SIZE ゴシック
+	                ClearObj "スキップ"
+	                HotPoint "スキップ" (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY TextWidth(INFO_TEXT_SKIP) TextHeight(Wide("あ")) "スキップ"
+	                Call ｋａｔ縁取り文字描画 (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY INFO_SKIP_SIZE INFO_FONT_COLOR ゴシック INFO_FONT_FRAME_WIDTH INFO_SKIP_FRAME_COLOR INFO_TEXT_SKIP 通常
+	            EndSw
+	        Loop While (選択 != "")
+	    Case Else
+	        Call ｋａｔ縁取り文字描画 dx dy size FONT_COLOR ゴシック FONT_FRAME_WIDTH FONT_FRAME_COLOR tmp Regular
+	        Font size ゴシック Regular
+	        Incr dx TextWidth(Mid(messages, i, 1))
+	        If 425 < dx Then
+	            Incr dy lineHeight
+	            Set dx baseDx
+	        EndIf
+	        Refresh
+	        Wait Until (連続描画文字数 * TEXT_SPEED)
+			Incr 連続描画文字数
+	    EndSw
+	Next
+	If Left(messages, 1) = "(" Then
+	    Call ｋａｔ縁取り文字描画 dx dy size FONT_COLOR ゴシック FONT_FRAME_WIDTH FONT_FRAME_COLOR "）" Regular 通常
+	Else
+	    If character != "システム" Then
+	        Call ｋａｔ縁取り文字描画 dx dy size FONT_COLOR ゴシック FONT_FRAME_WIDTH FONT_FRAME_COLOR "」" Regular 通常
+	    EndIf
+	EndIf
+	Do
+	    Wait Click
+	    Switch 選択
+	    Case ""
+		
+	    Case "スキップ"
+	        Set 会話スキップ
+	        Return
+	    Case Else
+	        Set メッセージ速度 選択
+	        Local numColor
+	        For k = 0 To 2
+	            Font INFO_NUMBER_SIZE ゴシック
+	            Set numColor IIf(k = メッセージ速度, #3399FF, INFO_FONT_COLOR)
+	            ClearObj k
+	            HotPoint k (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY TextWidth(Wide("あ")) TextHeight(Wide("あ"))
+	            Call ｋａｔ縁取り文字描画 (INFO_NUMBER_DX + k * TextWidth(Wide("あ")) * 2) INFO_NUMBER_DY INFO_NUMBER_SIZE numColor ゴシック INFO_FONT_FRAME_WIDTH INFO_FONT_FRAME_COLOR Wide(k) 通常
+	        Next
+	        Font INFO_SKIP_SIZE ゴシック
+	        ClearObj "スキップ"
+	        HotPoint "スキップ" (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY TextWidth(INFO_TEXT_SKIP) TextHeight(Wide("あ")) "スキップ"
+	        Call ｋａｔ縁取り文字描画 (INFO_SKIP_DX - TextWidth(INFO_TEXT_SKIP)) INFO_SKIP_DY INFO_SKIP_SIZE INFO_FONT_COLOR ゴシック INFO_FONT_FRAME_WIDTH INFO_SKIP_FRAME_COLOR INFO_TEXT_SKIP 通常
+	    EndSw
+	Loop While (選択 != "")
+EndIf
+Return
+
+
+//==============================================================================
+// FEEnd
+//------------------------------------------------------------------------------
+// 会話の終了処理をします。
+//------------------------------------------------------------------------------
+// in  : void
+// out : void
+//==============================================================================
+FEEnd:
+UnSet キャラクター名左
+UnSet キャラクター名右
+UnSet キャラクター名左旧
+UnSet キャラクター名右旧
+UnSet 発言方向
+UnSet 会話スキップ
+UnSet ウィンドウ作成済
+
+For i = 0 To 2
+    ClearObj i
+Next
+ClearObj "スキップ"
+
+Redraw
+Return
+
+
+//==============================================================================
+// FETalkL
+//------------------------------------------------------------------------------
+// 左側のキャラクター並びを更新します。
+//------------------------------------------------------------------------------
+// in  : characterA
+//       characterB
+//       characterC
+// out : void
+//==============================================================================
+FETalkL:
+For i = 1 To 3
+    If args(i) != "" Then
+        Set キャラクター名左[i] args(i)
+    Else
+        Set キャラクター名左[i] ""
+    EndIf
+Next
+Return
+
+
+//==============================================================================
+// FETalkR
+//------------------------------------------------------------------------------
+// 右側のキャラクター並びを更新します。
+//------------------------------------------------------------------------------
+// in  : characterA
+//       characterB
+//       characterC
+// out : void
+//==============================================================================
+FETalkR:
+For i = 1 To 3
+    If args(i) != "" Then
+        Set キャラクター名右[i] args(i)
+    Else
+        Set キャラクター名右[i] ""
+    EndIf
+Next
+Return

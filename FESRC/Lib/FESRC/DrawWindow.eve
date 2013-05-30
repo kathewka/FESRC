@@ -1,0 +1,58 @@
+//==============================================================================
+// ｋａｔウィンドウ描画
+//------------------------------------------------------------------------------
+// 画像を背景にしたウィンドウを描画します。
+// 変更はRefreshを実行した時に画面に反映されます。
+//------------------------------------------------------------------------------
+// in  : file        表示する画像ファイル名またはデータ名
+//         dx            表示領域のX座標（ピクセル）
+//         dy            表示領域のY座標（ピクセル）
+//         dw            表示領域の幅（ピクセル）
+//         dh            表示領域の高さ（ピクセル）
+//         frameWidth 枠線の太さ(省略可能)
+//       opt        オプション（凹凸反転、非保持）
+// out : void
+//==============================================================================
+ウィンドウ描画:
+ｋａｔウィンドウ描画:
+    Local file = args(1)
+    Local dx = args(2)
+    Local dy = args(3)
+    Local dw = args(4)
+    Local dh = args(5)
+    Local frameWidth = args(6)
+    Local opt = args(7)
+    
+    If frameWidth = "" Then
+        Set frameWidth 1
+    EndIf
+    
+    // 原画像の大きさを4の倍数に（エラー対策）
+    Local sw = dw + (4 - dw Mod 4)
+    Local sh = dh + (4 - dh Mod 4)
+    
+    If InStr(opt, "凹凸反転") != 0 Then
+        If InStr(opt, "非保持") != 0 Then
+            PaintPicture file dx dy dw dh dx dy sw sh "暗"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth) (dh - frameWidth) dx dy sw sh "明"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth * 2) (dh - frameWidth * 2) dx dy sw sh
+        Else
+            PaintPicture file dx dy dw dh dx dy sw sh "暗" "保持"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth) (dh - frameWidth) dx dy sw sh "明" "保持"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth * 2) (dh - frameWidth * 2) dx dy sw sh "保持"
+        EndIf
+    Else
+        If InStr(opt, "非保持") != 0 Then
+            PaintPicture file dx dy dw dh dx dy sw sh "明"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth) (dh - frameWidth) dx dy sw sh "暗"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth * 2) (dh - frameWidth * 2) dx dy sw sh
+        Else
+            PaintPicture file dx dy dw dh dx dy sw sh "明" "保持"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth) (dh - frameWidth) dx dy sw sh "暗" "保持"
+            PaintPicture file (dx + frameWidth) (dy + frameWidth) (dw - frameWidth * 2) (dh - frameWidth * 2) dx dy sw sh "保持"
+        EndIf
+    EndIf
+    
+Return
+
+

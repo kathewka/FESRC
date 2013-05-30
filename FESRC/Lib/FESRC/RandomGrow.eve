@@ -1,0 +1,408 @@
+*プロローグ:
+Global 乱数成長初期化
+If 乱数成長初期化 != 1 Then
+    //*** 記号定数の定義
+    // 当インクルード独自のステータス名称を、
+    // デフォルトのステータス名称に対応させる。
+    Global ステータス力
+    Set    ステータス力   格闘
+    Global ステータス魔力
+    Set    ステータス魔力 射撃
+    Global ステータス技
+    Set    ステータス技   命中
+    Global ステータス速さ
+    Set    ステータス速さ 回避
+    Global ステータス幸運
+    Set    ステータス幸運 技量
+    Global ステータス体格
+    Set    ステータス体格 反応
+    Global ステータス守備
+    Set    ステータス守備 装甲
+    Global ステータス魔防
+    Set    ステータス魔防 運動性
+    
+    // 広域変数の定義
+    
+    // 用語名変更
+    RenameTerm 格闘   力
+    RenameTerm 射撃   魔力
+    RenameTerm 命中   技
+    RenameTerm 回避   速さ
+    RenameTerm 技量   幸運
+    RenameTerm 反応   体格
+    RenameTerm 運動性 魔防
+    RenameTerm 装甲   守備
+    
+    Set 乱数成長初期化
+EndIf
+Exit
+
+
+//==============================================================================
+// FECreate
+// ＲＧCreate
+//------------------------------------------------------------------------------
+// 乱数成長用のユニットを生成し、配置します。
+// 引数はほとんどCreateのものと同じですが、ユニットランクの指定がないので注意
+// してください。
+//------------------------------------------------------------------------------
+// in  : ＲＧparty 作成するユニットの陣営名
+//       ＲＧunit  作成するユニットのユニット名称
+//       ＲＧpilot 作成するユニットに乗るパイロットの名称
+//       ＲＧlevel パイロットのレベル
+//       ＲＧx     ユニットを出撃させる座標（左上隅が(1,1)）
+//       ＲＧy     ユニットを出撃させる座標（左上隅が(1,1)）
+//       ＲＧID    パイロットのグループＩＤ（通常は不要）
+//       ＲＧoption出撃の表示方法を指定（省略可）
+//       opt       ボスの場合は"ボス"を指定
+// out : void
+//==============================================================================
+FECreate:
+ＲＧCreate:
+Local ＲＧparty = Args(1)
+Local ＲＧunit = Args(2)
+Local ＲＧpilot = Args(3)
+Local ＲＧlevel = Args(4)
+Local ＲＧx = Args(5)
+Local ＲＧy = Args(6)
+Local ＲＧID = Args(7)
+Local ＲＧoption = Args(8)
+Local opt = Args(9)
+Switch Args(7)
+Case ボス
+    Set ＲＧID IIf(Not Args(8) = ボス And Not Args(9) = ボス, "", ボス)
+	Set ＲＧoption IIf(Not Args(9) = ボス, "", Args(8))
+	Set opt Args(7)
+Case アニメ非表示 非同期
+    Set ＲＧID ""
+	Set ＲＧoption Args(7)
+	Set opt Args(8)
+EndSw
+If Not ＲＧID = "" Then
+    If Not ＲＧoption = "" Then
+	    Create ＲＧparty ＲＧunit 0 ＲＧpilot ＲＧlevel ＲＧx ＲＧy ＲＧID ＲＧoption
+	Else
+	    Create ＲＧparty ＲＧunit 0 ＲＧpilot ＲＧlevel ＲＧx ＲＧy ＲＧID
+	EndIf
+Else
+    If Not ＲＧoption = "" Then
+	    Create ＲＧparty ＲＧunit 0 ＲＧpilot ＲＧlevel ＲＧx ＲＧy ＲＧoption
+	Else
+	    Create ＲＧparty ＲＧunit 0 ＲＧpilot ＲＧlevel ＲＧx ＲＧy
+	EndIf
+EndIf
+If opt = "ボス" Then
+    Equip "ボスの証"
+EndIf
+
+// ドーピング
+// 書式フォーマットのレベルに応じて薬飲み替え
+Switch FESRCDataFormatLv
+// FESRCv0.1 試験公開版
+Case 1
+    Item "乱数成長薬レベル１"
+    Equip "乱数成長薬レベル１"
+// 最新
+Case Else
+    Item "乱数成長薬"
+    Equip "乱数成長薬"
+EndSw
+
+// 自軍ユニット以外はレベルに応じてステータスを上昇
+If Party(対象パイロット) != "味方" Then
+    ClearSkill 対象パイロット (ステータス力 & ＵＰ)
+    ClearSkill 対象パイロット (ステータス魔力 & ＵＰ)
+    ClearSkill 対象パイロット (ステータス技 & ＵＰ)
+    ClearSkill 対象パイロット (ステータス速さ & ＵＰ)
+    ClearSkill 対象パイロット (ステータス幸運 & ＵＰ)
+    
+    Local レベル差分 = (Level(対象パイロット) - 1)
+    If Info(ユニット, 対象ユニットＩＤ, サイズ) = "L" Then
+        Incr レベル差分 20
+    EndIf
+	
+    // 書式フォーマットのレベルに応じて処理切り替え
+    Switch FESRCDataFormatLv
+    // FESRCv0.1 試験公開版
+    Case 1
+        Local 力上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "力成長率") / 100 * レベル差分)
+        Local 魔力上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "魔力成長率") / 100 * レベル差分)
+        Local 技上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "技成長率") / 100 * レベル差分)
+        Local 速さ上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "速さ成長率") / 100 * レベル差分)
+        Local 幸運上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "幸運成長率") / 100 * レベル差分)
+        Local 守備上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "守備成長率") / 100 * レベル差分)
+        Local 魔防上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "魔防成長率") / 100 * レベル差分)
+        Local ＨＰ上昇値 = Int(Info(パイロット, 対象パイロット, 特殊能力解説, "ＨＰ成長率") / 100 * レベル差分)
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "力上昇") Then
+            Incr 力上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "力上昇")
+        EndIf
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "魔力上昇") Then
+            Incr 魔力上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "魔力上昇")
+        EndIf
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "技上昇") Then
+            Incr 技上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "技上昇")
+        EndIf
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "速さ上昇") Then
+            Incr 速さ上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "速さ上昇")
+        EndIf
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "幸運上昇") Then
+            Incr 幸運上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "幸運上昇")
+        EndIf
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "魔防上昇") Then
+            Incr 魔防上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "魔防上昇")
+        EndIf
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "守備上昇") Then
+            Incr 守備上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "守備上昇")
+        EndIf
+        If Info(ユニット, 対象ユニットＩＤ, 特殊能力所有, "ＨＰ上昇") Then
+            Incr ＨＰ上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力解説, "ＨＰ上昇")
+        EndIf
+    // 最新
+    Case Else
+        Local 力上昇値 = Int(Skill(対象パイロット, "力成長率") / 100 * レベル差分)
+        Local 魔力上昇値 = Int(Skill(対象パイロット, "魔力成長率") / 100 * レベル差分)
+        Local 技上昇値 = Int(Skill(対象パイロット, "技成長率") / 100 * レベル差分)
+        Local 速さ上昇値 = Int(Skill(対象パイロット, "速さ成長率") / 100 * レベル差分)
+        Local 幸運上昇値 = Int(Skill(対象パイロット, "幸運成長率") / 100 * レベル差分)
+        Local 守備上昇値 = Int(Skill(対象パイロット, "守備成長率") / 100 * レベル差分)
+        Local 魔防上昇値 = Int(Skill(対象パイロット, "魔防成長率") / 100 * レベル差分)
+        Local ＨＰ上昇値 = Int(Skill(対象パイロット, "ＨＰ成長率") / 100 * レベル差分)
+        Incr 力上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "力上昇")
+        Incr 魔力上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "魔力上昇")
+        Incr 技上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "技上昇")
+        Incr 速さ上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "速さ上昇")
+        Incr 幸運上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "幸運上昇")
+        Incr 守備上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "守備上昇")
+        Incr 魔防上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "魔防上昇")
+        Incr ＨＰ上昇値 Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "ＨＰ上昇")
+    EndSw
+    
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "力限界") < Skill(対象パイロット, 力) + 力上昇値 Then
+        Set 力上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "力限界") - Skill(対象パイロット, 力))
+    EndIf
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "魔力限界") < Skill(対象パイロット, 魔力) + 魔力上昇値 Then
+        Set 魔力上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "魔力限界") - Skill(対象パイロット, 魔力))
+    EndIf
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "技限界") < Skill(対象パイロット, 技) + 技上昇値 Then
+        Set 技上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "技限界") - Skill(対象パイロット, 技))
+    EndIf
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "速さ限界") < Skill(対象パイロット, 速さ) + 速さ上昇値 Then
+        Set 速さ上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "速さ限界") - Skill(対象パイロット, 速さ))
+    EndIf
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "幸運限界") < Skill(対象パイロット, 幸運) + 幸運上昇値 Then
+        Set 幸運上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "幸運限界") - Skill(対象パイロット, 幸運))
+    EndIf
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "守備限界") < Info(ユニット, 対象ユニットＩＤ, ステータス守備) + 守備上昇値 Then
+        Set 守備上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "守備限界") - Info(ユニット, 対象ユニットＩＤ, ステータス守備))
+    EndIf
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "魔防限界") < Info(ユニット, 対象ユニットＩＤ, ステータス魔防) + 魔防上昇値 Then
+        Set 魔防上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "魔防限界") - Info(ユニット, 対象ユニットＩＤ, ステータス魔防))
+    EndIf
+    If Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "ＨＰ限界") < Info(ユニット, 対象ユニットＩＤ, 最大ＨＰ) + ＨＰ上昇値 Then
+        Set ＨＰ上昇値 (Info(ユニット, 対象ユニットＩＤ, 特殊能力レベル, "ＨＰ限界") - Info(ユニット, 対象ユニットＩＤ, 最大ＨＰ))
+    EndIf
+    
+    SetSkill 対象パイロット (ステータス力 & "ＵＰ") (Skill(対象パイロット, ステータス力 & "ＵＰ") + 力上昇値) 非表示
+    SetSkill 対象パイロット (ステータス魔力 & "ＵＰ") (Skill(対象パイロット, ステータス魔力 & "ＵＰ") + 魔力上昇値) 非表示
+    SetSkill 対象パイロット (ステータス技 & "ＵＰ") (Skill(対象パイロット, ステータス技 & "ＵＰ") + 技上昇値) 非表示
+    SetSkill 対象パイロット (ステータス速さ & "ＵＰ") (Skill(対象パイロット, ステータス速さ & "ＵＰ") + 速さ上昇値) 非表示
+    SetSkill 対象パイロット (ステータス幸運 & "ＵＰ") (Skill(対象パイロット, ステータス幸運 & "ＵＰ") + 幸運上昇値) 非表示
+    UnSet tmp
+    Local tmp = 守備上昇値
+    Do While (10 <= tmp)
+        Equip 守備＋１０
+        Incr tmp -10
+    Loop
+    If tmp != 0 Then
+        Equip ("守備＋" & Wide(tmp))
+    EndIf
+    UnSet tmp
+    Local tmp = 魔防上昇値
+    Do While (10 <= tmp)
+        Equip 魔防＋１０
+        Incr tmp -10
+    Loop
+    If tmp != 0 Then
+        Equip ("魔防＋" & Wide(tmp))
+    EndIf
+    UnSet tmp
+    Local tmp = ＨＰ上昇値
+    Do While (10 <= tmp)
+        Equip ＨＰ＋１０
+        Incr tmp -10
+    Loop
+    If tmp != 0 Then
+        Equip ("ＨＰ＋" & Wide(tmp))
+    EndIf
+EndIf
+Return
+
+
+// 乱数を用いてステータスを上昇します。
+乱数成長:
+Local target = Args(1)
+
+// 書式フォーマットのレベルに応じて処理切り替え
+Switch FESRCDataFormatLv
+// FESRCv0.1 試験公開版
+Case 1
+    If Info(ユニット, UnitID(target), 特殊能力所有, "乱数成長モード") = 1 Then
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, 力成長率) Then
+            If Info(パイロット, target, ステータス力) < Info(ユニット, UnitID(target), 特殊能力解説, "力限界") Then
+                SetSkill target (ステータス力 & ＵＰ) (Skill(target, (ステータス力 & ＵＰ)) + 1) 非表示
+            EndIf
+        EndIf
+        
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, 魔力成長率) Then
+            If Info(パイロット, target, ステータス魔力) < Info(ユニット, UnitID(target), 特殊能力解説, "力限界") Then
+                SetSkill target (ステータス魔力 & ＵＰ) (Skill(target, (ステータス魔力 & ＵＰ)) + 1) 非表示
+            EndIf
+        EndIf
+        
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, 技成長率) Then
+            If Info(パイロット, target, ステータス技) < Info(ユニット, UnitID(target), 特殊能力解説, "技限界") Then
+                SetSkill target (ステータス技 & ＵＰ) (Skill(target, (ステータス技 & ＵＰ)) + 1) 非表示
+            EndIf
+        EndIf
+        
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, 速さ成長率) Then
+            If Info(パイロット, target, ステータス速さ) < Info(ユニット, UnitID(target), 特殊能力解説, "速さ限界") Then
+                SetSkill target (ステータス速さ & ＵＰ) (Skill(target, (ステータス速さ & ＵＰ)) + 1) 非表示
+            EndIf
+        EndIf
+        
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, 幸運成長率) Then
+            If Info(パイロット, target, ステータス幸運) < Info(ユニット, UnitID(target), 特殊能力解説, "幸運限界") Then
+                SetSkill target (ステータス幸運 & ＵＰ) (Skill(target, (ステータス幸運 & ＵＰ)) + 1) 非表示
+            EndIf
+        EndIf
+        
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, 守備成長率) Then
+            If Info(ユニット, UnitID(target), ステータス守備) < Info(ユニット, UnitID(target), 特殊能力解説, "守備限界") Then
+                Item 守備＋１
+                Equip UnitID(target) 守備＋１
+            EndIf
+        EndIf
+        
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, 魔防成長率) Then
+            If Info(ユニット, UnitID(target), ステータス魔防) < Info(ユニット, UnitID(target), 特殊能力解説, "魔防限界") Then
+                Item 魔防＋１
+                Equip UnitID(target) 魔防＋１
+            EndIf
+        EndIf
+        
+        If Random(100) <= Info(パイロット, target, 特殊能力レベル, ＨＰ成長率) Then
+            If Info(ユニット, UnitID(target), 最大ＨＰ) < Info(ユニット, UnitID(target), 特殊能力解説, "ＨＰ限界") Then
+                Item ＨＰ＋１
+                Equip UnitID(target) ＨＰ＋１
+				HP(target) = HP(target) - 1
+            EndIf
+        EndIf
+    EndIf
+// 最新
+Case Else
+    If Info(ユニット, UnitID(target), 特殊能力所有, "乱数成長モード") = 1 Then
+        //成長率100％毎に固定成長
+        SetSkill target 力 (Skill(target, 力) + Skill(target, 力成長率) \ 100)
+        If Skill(target, 力) < Info(ユニット, UnitID(target), 特殊能力レベル, "力限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, 力成長率) Mod 100 Then
+                SetSkill target 力 (Skill(target, 力) + 1)
+            EndIf
+        Else
+            //ステータスが限界値以上なら限界値に修正
+            SetSkill target 力 Info(ユニット, UnitID(target), 特殊能力レベル, "力限界")
+        EndIf
+        
+        SetSkill target 技 (Skill(target, 技) + Skill(target, 技成長率) \ 100)
+        If Skill(target, 技) < Info(ユニット, UnitID(target), 特殊能力レベル, "技限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, 技成長率) Mod 100 Then
+                SetSkill target 技 (Skill(target, 技) + 1)
+            EndIf
+        Else
+            //ステータスが限界値以上なら限界値に修正
+            SetSkill target 技 Info(ユニット, UnitID(target), 特殊能力レベル, "技限界")
+        EndIf
+        
+        SetSkill target 速さ (Skill(target, 速さ) + Skill(target, 速さ成長率) \ 100)
+        If Skill(target, 速さ) < Info(ユニット, UnitID(target), 特殊能力レベル, "速さ限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, 速さ成長率) Mod 100 Then
+                SetSkill target 速さ (Skill(target, 速さ) + 1)
+            EndIf
+        Else
+            //ステータスが限界値以上なら限界値に修正
+            SetSkill target 速さ Info(ユニット, UnitID(target), 特殊能力レベル, "速さ限界")
+        EndIf
+        
+        SetSkill target 幸運 (Skill(target, 幸運) + Skill(target, 幸運成長率) \ 100)
+        If Skill(target, 幸運) < Info(ユニット, UnitID(target), 特殊能力レベル, "幸運限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, 幸運成長率) Mod 100 Then
+                SetSkill target 幸運 (Skill(target, 幸運) + 1)
+            EndIf
+        Else
+            //ステータスが限界値以上なら限界値に修正
+            SetSkill target 幸運 Info(ユニット, UnitID(target), 特殊能力レベル, "幸運限界")
+        EndIf
+        
+        SetSkill target 魔力 (Skill(target, 魔力) + Skill(target, 魔力成長率) \ 100)
+        If Skill(target, 魔力) < Info(ユニット, UnitID(target), 特殊能力レベル, "魔力限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, 魔力成長率) Mod 100 Then
+                SetSkill target 魔力 (Skill(target, 魔力) + 1)
+            EndIf
+        Else
+            //ステータスが限界値以上なら限界値に修正
+            SetSkill target 魔力 Info(ユニット, UnitID(target), 特殊能力レベル, "魔力限界")
+        EndIf
+        
+        Local i
+        //成長率100％毎に固定成長
+        For i = 1 To (Skill(target, 守備成長率) \ 100)
+            If Info(ユニット, UnitID(target), ステータス守備) < Info(ユニット, UnitID(target), 特殊能力レベル, "守備限界") Then
+                Item 守備＋１
+                Equip UnitID(target) 守備＋１
+            EndIf
+        Next
+        If Info(ユニット, UnitID(target), ステータス守備) < Info(ユニット, UnitID(target), 特殊能力レベル, "守備限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, 守備成長率) Mod 100 Then
+                Item 守備＋１
+                Equip UnitID(target) 守備＋１
+            EndIf
+        EndIf
+        
+        For i = 1 To (Skill(target, 魔防成長率) \ 100)
+            If Info(ユニット, UnitID(target), ステータス魔防) < Info(ユニット, UnitID(target), 特殊能力レベル, "魔防限界") Then
+                Item 魔防＋１
+                Equip UnitID(target) 魔防＋１
+            EndIf
+        Next
+        If Info(ユニット, UnitID(target), ステータス魔防) < Info(ユニット, UnitID(target), 特殊能力レベル, "魔防限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, 魔防成長率) Mod 100 Then
+                Item 魔防＋１
+                Equip UnitID(target) 魔防＋１
+            EndIf
+        EndIf
+        
+        For i = 1 To (Skill(target, ＨＰ成長率) \ 100)
+            If Info(ユニット, UnitID(target), 最大ＨＰ) < Info(ユニット, UnitID(target), 特殊能力レベル, "ＨＰ限界") Then
+                Item ＨＰ＋１
+                Equip UnitID(target) ＨＰ＋１
+				HP(target) = HP(target) - 1
+            EndIf
+        Next
+        If Info(ユニット, UnitID(target), 最大ＨＰ) < Info(ユニット, UnitID(target), 特殊能力レベル, "ＨＰ限界") Then
+            //乱数成長
+            If Random(100) <= Skill(target, ＨＰ成長率) Mod 100 Then
+                Item ＨＰ＋１
+                Equip UnitID(target) ＨＰ＋１
+				HP(target) = HP(target) - 1
+            EndIf
+        EndIf
+    EndIf
+EndSw
+Return

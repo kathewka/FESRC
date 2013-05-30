@@ -1,0 +1,84 @@
+スタート:
+	Set ステージＢＧＭ "Test\ピルグリム.mp3"
+	StartBGM ステージＢＧＭ
+	KeepBGM
+	Organize 7 4 2
+	
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 2 17
+	Equip 鉄の槍
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 13 16
+	Equip 鉄の槍
+	ChangeMode 待機
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 13 19
+	Equip 鉄の槍
+	ChangeMode 待機
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 13 11
+	Equip 鉄の槍
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 15 11
+	Equip 鉄の槍
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 13 13
+	Equip 鉄の槍
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 15 13
+	Equip 鉄の槍
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 11 6
+	Equip 鉄の槍
+	ChangeMode 待機
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 12 6
+	Equip 鉄の槍
+	ChangeMode 待機
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 16 6
+	Equip 鉄の槍
+	ChangeMode 待機
+	ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 10 17 6
+	Equip 鉄の槍
+	ChangeMode 待機
+	ＲＧCreate 敵 テストハイランダー ハイル 1 14 3 "" "" "ボス"
+	Equip 手槍
+	ChangeMode 固定
+	
+	Call Ｐ－Ｄｅ＝Ｄ一括装備 全
+	
+	FERestoreEvent "破壊_ハイル"
+	SetStatus ハイル 破壊キャンセル -1
+Exit
+
+*ターン 全 味方:
+	Call ｋａｔトースト描画 "プレイヤーフェイズ" #FF6600
+Exit
+
+ターン 全 敵:
+	If (5 <= ターン数) Then
+		ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 20 4 1
+		Equip 鉄の槍
+		ＲＧCreate 敵 テストパラディン テストナイト(ザコ) 20 5 1
+		Equip 鉄の槍
+		Call Ｐ－Ｄｅ＝Ｄ一括装備 全
+	EndIf
+Exit
+
+マップコマンド インターミッションに行く:
+	Continue test2.eve
+Exit
+
+破壊_ハイル:
+	Redraw
+	FETalk ハイル "ぐはっ！;ここまでか‥"
+	FEEnd
+	Destroy ハイル
+	FETalkL テスタ テスチャー テスカ
+	FETalkR テサ テストー
+	FETalk テスタ "終わった‥！？"
+	FETalk テサ "まだよ。;:これはテストシナリオに過ぎない"
+	FETalk テストー "そうだな。この戦いは言わば始まりだったのかも知れない"
+	FETalk テスチャー "これからを作って行くのは、画面の前の皆だという事か"
+	FETalk テスカ "作るも、遊ぶも、彼ら次第。インクルードだもの"
+	FETalk テスカ "‥‥;;私は、できればみんなにはもっとＦＥＳＲＣの世界を広げていってほしいな"
+	FETalk テスタ "行こう、皆。;:テストを遊んでくれる人がいる限り、僕達の戦いは終わらない！"
+	FETalk テストー "ああ、夕日に向かって競争だ！"
+	FEEnd
+	FadeOut
+	Cls
+	FETalk システム "(;;;　　　　　　　　　　　　　　fin.)"
+	FEEnd
+	Continue test2.eve
+Exit
